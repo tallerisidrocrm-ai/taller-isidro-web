@@ -48,7 +48,7 @@ export default function Services() {
                         return (
                             <div key={index} className={`service-card ${detail.bgClass}`}>
                                 <div className="service-overlay">
-                                    <div className="service-icon">{detail.icon}</div>
+                                    {/* Icon removed per request */}
                                     <h3 className="service-title">{serviceName}</h3>
                                     <div className="service-line"></div>
                                     <p style={{ color: '#ccc', marginTop: '10px', fontSize: '0.9rem' }}>{detail.description}</p>

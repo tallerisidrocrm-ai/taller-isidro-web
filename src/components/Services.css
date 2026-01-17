@@ -73,23 +73,23 @@
 
 /* Fallback Gradients/Images for when no real image is available */
 .bg-diagnostico {
-    background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop');
-    /* Placeholder: High tech dashboard/code */
+    background-image: url('https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=1000&auto=format&fit=crop');
+    /* Diagnostic/Tech */
 }
 
 .bg-mecanica {
-    background-image: url('https://images.unsplash.com/photo-1486262715619-01b8c2297605?q=80&w=1000&auto=format&fit=crop');
-    /* Placeholder: Mechanic engine */
+    background-image: url('https://images.unsplash.com/photo-1486006920555-c77dcf18193c?q=80&w=1000&auto=format&fit=crop');
+    /* Car Engine/Hood open */
 }
 
 .bg-performance {
-    background-image: url('https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=1000&auto=format&fit=crop');
-    /* Placeholder: Fast Car/Engine */
+    background-image: url('https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=1000&auto=format&fit=crop');
+    /* Sports car dashboard/speed */
 }
 
 .bg-detailing {
     background-image: url('https://images.unsplash.com/photo-1601362840469-51e4d8d58785?q=80&w=1000&auto=format&fit=crop');
-    /* Placeholder: Polishing car */
+    /* Polishing car */
 }
 
 /* Mobile Adjustments */
