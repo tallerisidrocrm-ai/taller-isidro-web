@@ -73,18 +73,18 @@
 
 /* Fallback Gradients/Images for when no real image is available */
 .bg-diagnostico {
-    background-image: url('https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=1000&auto=format&fit=crop');
-    /* Diagnostic/Tech */
+    background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop');
+    /* Placeholder: High tech dashboard/code - RESTORED */
 }
 
+/* Mecánica Integral removed from display, keeping class just in case or removing if desired. Leaving for safety. */
 .bg-mecanica {
     background-image: url('https://images.unsplash.com/photo-1486006920555-c77dcf18193c?q=80&w=1000&auto=format&fit=crop');
-    /* Car Engine/Hood open */
 }
 
 .bg-performance {
-    background-image: url('https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=1000&auto=format&fit=crop');
-    /* Sports car dashboard/speed */
+    background-image: url('https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?q=80&w=1000&auto=format&fit=crop');
+    /* Tuning/Laptop on Engine/Chipping */
 }
 
 .bg-detailing {

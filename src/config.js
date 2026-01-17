@@ -18,7 +18,6 @@ export const businessConfig = {
     ],
     services: [
         "Diagnóstico Computarizado",
-        "Mecánica Integral",
         "Performance",
         "Detailing"
     ],
