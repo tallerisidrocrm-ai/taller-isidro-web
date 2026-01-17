@@ -43,7 +43,7 @@ export default function Hero() {
                 </video>
             </div>
 
-            <div className="container" style={{ position: 'relative', zIndex: 2, paddingTop: '77px', paddingBottom: '50px' }}>
+            <div className="container" style={{ position: 'relative', zIndex: 2, paddingTop: '65px', paddingBottom: '50px' }}>
                 <div style={{ maxWidth: '800px' }}>
                     <h1 className="hero-title" style={{ fontSize: '3.5rem', fontWeight: '900', textTransform: 'uppercase', lineHeight: '1.1', marginBottom: '15px' }}>
                         Tu Servicio <br />
