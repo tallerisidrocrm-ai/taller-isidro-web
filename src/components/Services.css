@@ -1,0 +1,100 @@
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.service-card {
+    position: relative;
+    height: 350px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.service-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, 0.2) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 30px;
+    transition: background 0.3s ease;
+}
+
+.service-card:hover .service-overlay {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+.service-icon {
+    font-size: 3rem;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover .service-icon {
+    transform: scale(1.1);
+}
+
+.service-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.service-line {
+    width: 50px;
+    height: 4px;
+    background-color: var(--accent-color);
+    margin-bottom: 0;
+    transition: width 0.3s ease;
+}
+
+.service-card:hover .service-line {
+    width: 80px;
+}
+
+/* Fallback Gradients/Images for when no real image is available */
+.bg-diagnostico {
+    background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop');
+    /* Placeholder: High tech dashboard/code */
+}
+
+.bg-mecanica {
+    background-image: url('https://images.unsplash.com/photo-1486262715619-01b8c2297605?q=80&w=1000&auto=format&fit=crop');
+    /* Placeholder: Mechanic engine */
+}
+
+.bg-performance {
+    background-image: url('https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=1000&auto=format&fit=crop');
+    /* Placeholder: Fast Car/Engine */
+}
+
+.bg-detailing {
+    background-image: url('https://images.unsplash.com/photo-1601362840469-51e4d8d58785?q=80&w=1000&auto=format&fit=crop');
+    /* Placeholder: Polishing car */
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .service-card {
+        height: 300px;
+    }
+}
