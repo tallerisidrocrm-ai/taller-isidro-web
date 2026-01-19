@@ -107,16 +107,16 @@ export default function StatisticsPage() {
                     <span className="section-label">Resumen Anual {filters.anio}</span>
                     <div className="kpi-grid">
                         <div className="kpi-card">
-                            <div className="kpi-value">{annualTotals.presupuestos}</div>
-                            <div className="kpi-label">Consultas Anuales</div>
-                        </div>
-                        <div className="kpi-card">
                             <div className="kpi-value">{annualTotals.inspecciones}</div>
                             <div className="kpi-label">Inspecciones Totales</div>
                         </div>
                         <div className="kpi-card">
                             <div className="kpi-value">{annualTotals.reparaciones}</div>
                             <div className="kpi-label">Reparaciones Realizadas</div>
+                        </div>
+                        <div className="kpi-card">
+                            <div className="kpi-value">{annualTotals.presupuestos}</div>
+                            <div className="kpi-label">Pendiente de Presupuesto</div>
                         </div>
                         <div className="kpi-card">
                             <div className="kpi-value">{formatCurrency(annualTotals.income)}</div>
