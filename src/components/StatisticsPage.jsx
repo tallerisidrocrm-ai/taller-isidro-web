@@ -23,7 +23,7 @@ export default function StatisticsPage() {
         estado: '',
         seguro: '',
         marca: '',
-        mes: new Date().getMonth().toString(), // Current month (0-indexed)
+        mes: 'all', // Default to all year
         anio: new Date().getFullYear().toString()
     });
 
@@ -64,6 +64,7 @@ export default function StatisticsPage() {
 
     // Monthly Data (Filtered by Month and Year)
     const monthlyData = useMemo(() => {
+        if (filters.mes === 'all') return annualData;
         return annualData.filter(r => new Date(r.fechaInspeccion).getMonth().toString() === filters.mes);
     }, [annualData, filters.mes]);
 
@@ -130,6 +131,7 @@ export default function StatisticsPage() {
                         <span className="section-label" style={{ marginBottom: 0 }}>Análisis Mensual</span>
                         <div className="filters-inline" style={{ display: 'flex', gap: '10px' }}>
                             <select name="mes" className="filter-input" value={filters.mes} onChange={handleFilterChange}>
+                                <option value="all">Todo el año</option>
                                 {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
                             </select>
                             <select name="anio" className="filter-input" value={filters.anio} onChange={handleFilterChange}>
@@ -141,7 +143,9 @@ export default function StatisticsPage() {
 
                     <div className="kpi-grid">
                         <div className="kpi-card">
-                            <div className="kpi-value" style={{ fontSize: '2rem' }}>{months[filters.mes]}</div>
+                            <div className="kpi-value" style={{ fontSize: '1.8rem' }}>
+                                {filters.mes === 'all' ? `Consolidado ${filters.anio}` : months[filters.mes]}
+                            </div>
                             <div className="kpi-label">Mes Seleccionado</div>
                             <div className="monthly-stats-grid">
                                 <div className="stat-item">

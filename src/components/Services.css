@@ -83,8 +83,8 @@
 }
 
 .bg-performance {
-    background-image: url('https://images.unsplash.com/photo-1580273916550-e323be2ebccd?q=80&w=1000&auto=format&fit=crop');
-    /* Street Car on Track (Porsche) Side View */
+    background-image: url('/images/performance.png');
+    /* Premium Porsche in Garage */
 }
 
 .bg-detailing {
