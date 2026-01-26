@@ -1,9 +1,11 @@
+import { businessConfig } from '../config';
+
 export default function TopBar() {
     return (
         <div className="top-bar" style={{ backgroundColor: '#000', padding: '10px 0', borderBottom: '1px solid #333' }}>
             <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', color: '#ccc' }}>
-                <p>“Si tiene ruedas, lo arreglamos”  |  Abierto Lun-Sáb 7:00–18:00</p>
-                <a href="tel:+1234567890" style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>Llamanos: (555) 123-4567</a>
+                <p>“Si tiene ruedas, lo arreglamos”  |  Abierto {businessConfig.hours[0].day} {businessConfig.hours[0].time}</p>
+                <a href={`tel:${businessConfig.phone}`} style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>Llamanos: {businessConfig.phone}</a>
             </div>
         </div>
     );

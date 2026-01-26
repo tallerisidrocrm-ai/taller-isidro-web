@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import TopBar from './components/TopBar';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -6,6 +7,7 @@ import InsuranceBanner from './components/InsuranceBanner';
 import Bodywork from './components/Bodywork';
 import Services from './components/Services';
 import Metrics from './components/Metrics';
+import Team from './components/Team';
 import Contact from './components/Contact';
 import Blog from './components/Blog';
 import OilBanner from './components/OilBanner';
@@ -25,7 +27,7 @@ function HomePage() {
       <Services />
       <Metrics />
       <Testimonials />
-      {/* <Team /> */}
+      <Team />
       <Contact />
       <OilBanner />
       <Blog />
@@ -38,6 +40,7 @@ function App() {
   return (
     <Router>
       <div className="app">
+        <TopBar />
         <Header />
         <main>
           <Routes>

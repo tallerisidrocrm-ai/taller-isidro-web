@@ -24,6 +24,11 @@ export default function Services() {
             icon: "✨",
             bgClass: "bg-detailing",
             description: "Estética y protección superior para tu auto."
+        },
+        "Chapa y Pintura": {
+            icon: "🎨",
+            bgClass: "bg-chapa",
+            description: "Reparación de carrocería y pintura de alta calidad."
         }
     };
 

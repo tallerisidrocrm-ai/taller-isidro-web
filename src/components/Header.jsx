@@ -15,6 +15,7 @@ export default function Header() {
                     <ul className="nav-menu-list">
                         <li><Link to="/" className="nav-link">Inicio</Link></li>
                         <li><a href="/#about" className="nav-link">Nosotros</a></li>
+                        <li><a href="/#bodywork" className="nav-link">Chapa y Pintura</a></li>
                         <li><a href="/#services" className="nav-link">Servicios</a></li>
                         <li><a href="/#blog" className="nav-link">Blog</a></li>
                         <li><a href="/#contact" className="nav-link">Contacto</a></li>

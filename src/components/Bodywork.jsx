@@ -1,3 +1,5 @@
+import { businessConfig } from '../config';
+
 export default function Bodywork() {
     return (
         <section id="bodywork" className="section-padding" style={{ position: 'relative', minHeight: '600px', display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
@@ -23,7 +25,7 @@ export default function Bodywork() {
                 <p style={{ color: '#ddd', marginBottom: '30px', fontSize: '1.2rem', lineHeight: '1.8' }}>
                     Devolvemos a tu auto su estética original con acabados de fábrica. Utilizamos materiales de primera calidad y tecnología de igualación de color computarizada para garantizar resultados impecables en reparaciones de choques, granizo y rayones.
                 </p>
-                <button onClick={() => window.open('https://wa.me/5491159722457?text=Hola,%20quisiera%20presupuesto%20de%20Chapa%20y%20Pintura', '_blank')} className="btn btn-primary">Solicitar Presupuesto</button>
+                <button onClick={() => window.open(`https://wa.me/${businessConfig.whatsappNumber}?text=Hola,%20quisiera%20presupuesto%20de%20Chapa%20y%20Pintura`, '_blank')} className="btn btn-primary">Solicitar Presupuesto</button>
             </div>
         </section>
     );
