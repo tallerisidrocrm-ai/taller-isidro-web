@@ -17,8 +17,6 @@ export const businessConfig = {
         { day: "Domingo", time: "Cerrado", closed: true }
     ],
     services: [
-        "Mecánica Integral",
-        "Chapa y Pintura",
         "Diagnóstico Computarizado",
         "Performance",
         "Detailing"
