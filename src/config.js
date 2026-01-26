@@ -1,6 +1,6 @@
 export const businessConfig = {
     name: "Taller Isidro",
-    tagline: "Integral",
+    tagline: "Mecánica Integral & Estética",
     description: "Mantenimiento profesional y reparaciones confiables. Devolvemos la vida a tu vehículo con cuidado experto y repuestos de primera calidad.",
     phone: "11 5972-2457",
     whatsappNumber: "5491159722457",
