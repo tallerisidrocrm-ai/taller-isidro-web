@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import TopBar from './components/TopBar';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -36,21 +36,30 @@ function HomePage() {
   );
 }
 
+function AppContent() {
+  const location = useLocation();
+  const isStatsPage = location.pathname === '/estadisticas';
+
+  return (
+    <div className="app">
+      {!isStatsPage && <TopBar />}
+      <Header />
+      <main>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/estadisticas" element={<StatisticsPage />} />
+        </Routes>
+      </main>
+      <Footer />
+      {!isStatsPage && <WhatsAppButton />}
+    </div>
+  );
+}
+
 function App() {
   return (
     <Router>
-      <div className="app">
-        <TopBar />
-        <Header />
-        <main>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/estadisticas" element={<StatisticsPage />} />
-          </Routes>
-        </main>
-        <Footer />
-        <WhatsAppButton />
-      </div>
+      <AppContent />
     </Router>
   );
 }

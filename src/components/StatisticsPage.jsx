@@ -11,7 +11,7 @@ const months = [
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ];
 
-const COLORS = ['#FFC107', '#4CAF50', '#2196F3', '#E91E63', '#9C27B0'];
+const COLORS = ['#FFC107', '#4CAF50', '#2196F3', '#E91E63', '#9C27B0', '#00BCD4', '#FF9800'];
 
 const MOCK_RECORDS = [
     { id: 1, patente: 'ABC 123', cliente: 'Juan Perez', marca: 'Toyota', modelo: 'Corolla', seguro: 'Particular', estado: 'Finalizado', precioBase: 150000, calificacionCliente: 5, fechaInspeccion: '2026-01-26', tipo: 'Chapa y Pintura' },
@@ -50,8 +50,7 @@ export default function StatisticsPage() {
         };
         loadData();
 
-        // Polling for live updates every 5 minutes
-        const interval = setInterval(loadData, 300000);
+        const interval = setInterval(loadData, 300000); // Polling 5min
         return () => clearInterval(interval);
     }, []);
 
@@ -59,17 +58,17 @@ export default function StatisticsPage() {
         const today = new Date().toISOString().split('T')[0];
 
         const counts = {
+            overview: {
+                total: records.length,
+                inspecciones: records.filter(r => r.tipo === 'Inspección').length,
+                reparaciones: records.filter(r => r.tipo?.includes('Reparación') || r.tipo?.includes('Mecánica') || r.tipo?.includes('Chapa')).length,
+                finalizados: records.filter(r => r.estado === 'Finalizado').length,
+            },
             today: {
                 total: 0,
                 inspecciones: 0,
                 reparaciones: 0,
                 finalizados: 0
-            },
-            monthly: {
-                total: records.length,
-                inspecciones: records.filter(r => r.tipo === 'Inspección').length,
-                reparaciones: records.filter(r => r.tipo?.includes('Reparación') || r.tipo?.includes('Mecánica') || r.tipo?.includes('Chapa')).length,
-                finalizados: records.filter(r => r.estado === 'Finalizado').length,
             },
             clientTypesData: [
                 { name: 'Particulares', value: records.filter(r => r.seguro?.toLowerCase() === 'particular').length },
@@ -85,41 +84,55 @@ export default function StatisticsPage() {
         };
 
         records.forEach(r => {
+            // Daily check
             if (r.fechaInspeccion === today) {
                 counts.today.total++;
                 if (r.tipo === 'Inspección') counts.today.inspecciones++;
-                if (r.tipo?.includes('Reparación')) counts.today.reparaciones++;
+                if (r.tipo?.includes('Reparación') || r.tipo?.includes('Mecánica')) counts.today.reparaciones++;
                 if (r.estado === 'Finalizado') counts.today.finalizados++;
             }
 
+            // Insurer aggregation
             if (r.seguro && r.seguro !== 'Particular') {
                 counts.insurers[r.seguro] = (counts.insurers[r.seguro] || 0) + 1;
             }
         });
 
+        // Convert insurers to array for chart/list
+        counts.insurersData = Object.entries(counts.insurers)
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value);
+
         return counts;
     };
 
     const annualData = useMemo(() => {
-        return data.filter(r => new Date(r.fechaInspeccion).getFullYear().toString() === filters.anio);
+        return data.filter(r => {
+            const date = new Date(r.fechaInspeccion);
+            return date.getFullYear().toString() === filters.anio;
+        });
     }, [data, filters.anio]);
 
-    const currentMonthData = useMemo(() => {
+    const currentPeriodData = useMemo(() => {
         if (filters.mes === 'all') return annualData;
-        return annualData.filter(r => new Date(r.fechaInspeccion).getMonth().toString() === filters.mes);
+        return annualData.filter(r => {
+            const date = new Date(r.fechaInspeccion);
+            return date.getMonth().toString() === filters.mes;
+        });
     }, [annualData, filters.mes]);
 
-    const stats = useMemo(() => calculateAdvancedStats(currentMonthData), [currentMonthData]);
+    const stats = useMemo(() => calculateAdvancedStats(currentPeriodData), [currentPeriodData]);
 
-    const filteredData = useMemo(() => {
-        let result = currentMonthData;
+    const filteredTableData = useMemo(() => {
+        let result = currentPeriodData;
         if (filters.estado) result = result.filter(r => r.estado === filters.estado);
         if (filters.seguro) result = result.filter(r => r.seguro === filters.seguro);
         if (filters.marca) result = result.filter(r =>
-            r.marca && r.marca.toLowerCase().includes(filters.marca.toLowerCase())
+            (r.marca && r.marca.toLowerCase().includes(filters.marca.toLowerCase())) ||
+            (r.patente && r.patente.toLowerCase().includes(filters.marca.toLowerCase()))
         );
-        return result;
-    }, [currentMonthData, filters.estado, filters.seguro, filters.marca]);
+        return result.sort((a, b) => new Date(b.fechaInspeccion) - new Date(a.fechaInspeccion));
+    }, [currentPeriodData, filters.estado, filters.seguro, filters.marca]);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -130,47 +143,82 @@ export default function StatisticsPage() {
         return <div className="stats-container" style={{ textAlign: 'center' }}>Cargando estadísticas en vivo...</div>;
     }
 
+    const isAnnual = filters.mes === 'all';
+
     return (
         <div className="stats-container">
             <div className="container">
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <div className="pulse-dot"></div>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--stat-accent)', textTransform: 'uppercase', letterSpacing: '2px' }}>Datos en Vivo</span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--stat-accent)', textTransform: 'uppercase', letterSpacing: '2px' }}>Airtable Live</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
-                    <p className="stats-subtitle">Estadísticas frescas por día y por mes</p>
+                    <p className="stats-subtitle">Estadísticas vinculadas a gestión real</p>
                 </header>
 
-                {/* Daily Overview */}
-                <div className="stats-summary-section">
-                    <span className="section-label">Actividad de Hoy ({new Date().toLocaleDateString()})</span>
-                    <div className="kpi-grid">
-                        <div className="kpi-card">
-                            <div className="kpi-value">{stats.today.total}</div>
-                            <div className="kpi-label">Ingresos Hoy</div>
-                        </div>
-                        <div className="kpi-card">
-                            <div className="kpi-value">{stats.today.inspecciones}</div>
-                            <div className="kpi-label">Inspecciones Hoy</div>
-                        </div>
-                        <div className="kpi-card">
-                            <div className="kpi-value">{stats.today.reparaciones}</div>
-                            <div className="kpi-label">Reparaciones Hoy</div>
-                        </div>
-                        <div className="kpi-card">
-                            <div className="kpi-value">{stats.today.finalizados}</div>
-                            <div className="kpi-label">Finalizados Hoy</div>
+                {/* Dashboard Filters */}
+                <div className="filters-dashboard">
+                    <div className="filter-group-main">
+                        <label>Periodo de Análisis</label>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <select name="mes" className="filter-input-large" value={filters.mes} onChange={handleFilterChange}>
+                                <option value="all">Resumen Anual</option>
+                                {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
+                            </select>
+                            <select name="anio" className="filter-input-large" value={filters.anio} onChange={handleFilterChange}>
+                                <option value="2024">2024</option>
+                                <option value="2025">2025</option>
+                                <option value="2026">2026</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                {/* Interactive Charts Section */}
+                {/* Summary Section */}
                 <div className="stats-summary-section">
-                    <span className="section-label">Gráficos de Tendencia</span>
+                    <span className="section-label">
+                        {isAnnual ? `Resumen Consolidado ${filters.anio}` : `Resumen ${months[filters.mes]} ${filters.anio}`}
+                    </span>
+                    <div className="kpi-grid">
+                        <div className="kpi-card">
+                            <div className="kpi-value">{stats.overview.total}</div>
+                            <div className="kpi-label">Unidades Totales</div>
+                        </div>
+                        <div className="kpi-card">
+                            <div className="kpi-value">{stats.overview.inspecciones}</div>
+                            <div className="kpi-label">Inspecciones</div>
+                        </div>
+                        <div className="kpi-card">
+                            <div className="kpi-value">{stats.overview.reparaciones}</div>
+                            <div className="kpi-label">Reparaciones/Mecánica</div>
+                        </div>
+                        <div className="kpi-card">
+                            <div className="kpi-value">{stats.overview.finalizados}</div>
+                            <div className="kpi-label">Finalizados</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Today Overview (Only if current year/month matches today) */}
+                {!isAnnual && parseInt(filters.mes) === new Date().getMonth() && filters.anio === new Date().getFullYear().toString() && (
+                    <div className="stats-summary-section animate-fade-in">
+                        <span className="section-label" style={{ color: '#4CAF50', borderLeftColor: '#4CAF50' }}>Actividad de Hoy ({new Date().toLocaleDateString()})</span>
+                        <div className="kpi-grid-mini">
+                            <div className="stat-card-mini"><span>Entradas:</span> <strong>{stats.today.total}</strong></div>
+                            <div className="stat-card-mini"><span>Insp:</span> <strong>{stats.today.inspecciones}</strong></div>
+                            <div className="stat-card-mini"><span>Rep:</span> <strong>{stats.today.reparaciones}</strong></div>
+                            <div className="stat-card-mini"><span>Fin:</span> <strong>{stats.today.finalizados}</strong></div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Visual Charts */}
+                <div className="stats-summary-section">
+                    <span className="section-label">Distribución de Carga</span>
                     <div className="charts-grid">
                         <div className="chart-card">
-                            <h3>Origen de Clientes</h3>
+                            <h3>Unidades por Origen</h3>
                             <div style={{ height: '300px' }}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
@@ -193,15 +241,15 @@ export default function StatisticsPage() {
                         </div>
 
                         <div className="chart-card">
-                            <h3>Distribución de Servicios</h3>
+                            <h3>Ranking Aseguradoras ({isAnnual ? 'Anual' : 'Mensual'})</h3>
                             <div style={{ height: '300px' }}>
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={stats.servicesData}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                                        <XAxis dataKey="name" stroke="#888" fontSize={12} />
-                                        <YAxis stroke="#888" fontSize={12} />
+                                    <BarChart data={stats.insurersData} layout="vertical">
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={true} vertical={false} />
+                                        <XAxis type="number" stroke="#888" fontSize={12} />
+                                        <YAxis dataKey="name" type="category" stroke="#888" fontSize={11} width={100} />
                                         <Tooltip contentStyle={{ backgroundColor: '#242424', border: '1px solid #333' }} />
-                                        <Bar dataKey="value" fill="#FFC107" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="value" fill="#FFC107" radius={[0, 4, 4, 0]} barSize={20} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
@@ -209,115 +257,103 @@ export default function StatisticsPage() {
                     </div>
                 </div>
 
-                {/* Monthly Analysis */}
-                <div className="stats-summary-section">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
-                        <span className="section-label">Análisis Mensual: {filters.mes === 'all' ? filters.anio : months[filters.mes]}</span>
-                        <div className="filters-inline">
-                            <select name="mes" className="filter-input" value={filters.mes} onChange={handleFilterChange}>
-                                <option value="all">Todo el año</option>
-                                {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
-                            </select>
-                            <select name="anio" className="filter-input" value={filters.anio} onChange={handleFilterChange}>
-                                <option value="2025">2025</option>
-                                <option value="2026">2026</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="stats-grid-complex">
-                        <div className="complex-card">
-                            <h3>Operaciones Mensuales</h3>
-                            <div className="stat-row"><span>Total Mes:</span> <strong>{stats.monthly.total}</strong></div>
-                            <div className="stat-row"><span>Inspecciones:</span> <strong>{stats.monthly.inspecciones}</strong></div>
-                            <div className="stat-row"><span>Reparaciones:</span> <strong>{stats.monthly.reparaciones}</strong></div>
-                            <div className="stat-row"><span>Finalizados:</span> <strong>{stats.monthly.finalizados}</strong></div>
-                        </div>
-
-                        <div className="complex-card">
-                            <h3>Detalle de Servicios</h3>
-                            {stats.servicesData.map(s => (
-                                <div key={s.name} className="stat-row"><span>{s.name}:</span> <strong>{s.value}</strong></div>
-                            ))}
-                        </div>
-
-                        <div className="complex-card">
-                            <h3>Origen de Clientes</h3>
-                            {stats.clientTypesData.map(c => (
-                                <div key={c.name} className="stat-row"><span>{c.name}:</span> <strong>{c.value}</strong></div>
-                            ))}
-                            <div style={{ marginTop: '15px' }}>
-                                <small style={{ color: 'var(--stat-text-muted)', textTransform: 'uppercase' }}>Por Aseguradora:</small>
-                                {Object.entries(stats.insurers).map(([name, count]) => (
-                                    <div key={name} className="stat-row-mini"><span>{name}:</span> <span>{count}</span></div>
-                                ))}
+                {/* Comparison & Details */}
+                <div className="stats-grid-complex">
+                    <div className="complex-card">
+                        <h3>Detalle por Aseguradora</h3>
+                        {stats.insurersData.length > 0 ? stats.insurersData.map((ins, i) => (
+                            <div key={i} className="stat-row">
+                                <span>{ins.name}</span>
+                                <div>
+                                    <strong>{ins.value}</strong>
+                                    <small style={{ marginLeft: '5px', color: 'var(--stat-text-muted)' }}>
+                                        ({((ins.value / stats.overview.total) * 100).toFixed(1)}%)
+                                    </small>
+                                </div>
                             </div>
+                        )) : (
+                            <p style={{ padding: '20px', textAlign: 'center', color: 'var(--stat-text-muted)' }}>Sin datos de seguros en este periodo.</p>
+                        )}
+                    </div>
+
+                    <div className="complex-card">
+                        <h3>Categorías de Servicio</h3>
+                        {stats.servicesData.map((ser, i) => (
+                            <div key={i} className="stat-row">
+                                <span>{ser.name}</span>
+                                <strong>{ser.value} unidades</strong>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Filterable Table */}
+                <div className="data-section">
+                    <div className="filters-bar">
+                        <div className="filter-group">
+                            <label>Estado</label>
+                            <select name="estado" className="filter-input" value={filters.estado} onChange={handleFilterChange}>
+                                <option value="">Todos los Estados</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Aprobado">Aprobado</option>
+                                <option value="En Proceso">En Proceso</option>
+                                <option value="Finalizado">Finalizado</option>
+                                <option value="Rechazado">Rechazado</option>
+                            </select>
+                        </div>
+                        <div className="filter-group">
+                            <label>Origen</label>
+                            <select name="seguro" className="filter-input" value={filters.seguro} onChange={handleFilterChange}>
+                                <option value="">Todos los Orígenes</option>
+                                <option value="Particular">Particular</option>
+                                {stats.insurersData.map(ins => (
+                                    <option key={ins.name} value={ins.name}>{ins.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="filter-group">
+                            <label>Buscador</label>
+                            <input type="text" name="marca" placeholder="Patente o Marca..." className="filter-input" value={filters.marca} onChange={handleFilterChange} />
                         </div>
                     </div>
-                </div>
 
-                {/* Table */}
-                <div className="filters-bar">
-                    <div className="filter-group">
-                        <label>Estado</label>
-                        <select name="estado" className="filter-input" value={filters.estado} onChange={handleFilterChange}>
-                            <option value="">Todos</option>
-                            <option value="Pendiente">Pendiente</option>
-                            <option value="Aprobado">Aprobado</option>
-                            <option value="En Proceso">En Proceso</option>
-                            <option value="Finalizado">Finalizado</option>
-                            <option value="Rechazado">Rechazado</option>
-                        </select>
-                    </div>
-                    <div className="filter-group">
-                        <label>Origen/Seguro</label>
-                        <select name="seguro" className="filter-input" value={filters.seguro} onChange={handleFilterChange}>
-                            <option value="">Todos</option>
-                            <option value="Particular">Particular</option>
-                            <option value="La Caja">La Caja</option>
-                            <option value="Fed. Patronal">Fed. Patronal</option>
-                            <option value="Mapfre">Mapfre</option>
-                        </select>
-                    </div>
-                    <div className="filter-group">
-                        <label>Buscar Vehículo</label>
-                        <input type="text" name="marca" placeholder="Patente o Marca..." className="filter-input" value={filters.marca} onChange={handleFilterChange} />
-                    </div>
-                </div>
-
-                <div className="data-table-container">
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Vehículo</th>
-                                <th>Origen</th>
-                                <th>Servicio</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredData.length > 0 ? filteredData.map((row, i) => (
-                                <tr key={i}>
-                                    <td style={{ color: 'var(--stat-text-muted)', fontSize: '0.8rem' }}>{row.fechaInspeccion}</td>
-                                    <td><strong>{row.patente}</strong> <br /><small>{row.marca} {row.modelo}</small></td>
-                                    <td>{row.seguro}</td>
-                                    <td style={{ fontWeight: '500' }}>{row.tipo}</td>
-                                    <td>
-                                        <span className={`badge badge-${row.estado?.toLowerCase().replace(' ', '')}`}>
-                                            {row.estado}
-                                        </span>
-                                    </td>
-                                </tr>
-                            )) : (
+                    <div className="data-table-container">
+                        <table className="data-table">
+                            <thead>
                                 <tr>
-                                    <td colSpan="5" style={{ textAlign: 'center', padding: '40px' }}>No hay registros coincidentes.</td>
+                                    <th>Fecha</th>
+                                    <th>Unidad</th>
+                                    <th>Origen</th>
+                                    <th>Servicio</th>
+                                    <th>Estado</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {filteredTableData.length > 0 ? filteredTableData.map((row, i) => (
+                                    <tr key={i}>
+                                        <td style={{ color: 'var(--stat-text-muted)', fontSize: '0.8rem' }}>{row.fechaInspeccion}</td>
+                                        <td><strong>{row.patente}</strong> <br /><small>{row.marca} {row.modelo}</small></td>
+                                        <td>{row.seguro}</td>
+                                        <td style={{ fontWeight: '500' }}>{row.tipo}</td>
+                                        <td>
+                                            <span className={`badge badge-${row.estado?.toLowerCase().replace(' ', '')}`}>
+                                                {row.estado}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan="5" style={{ textAlign: 'center', padding: '60px', color: 'var(--stat-text-muted)' }}>
+                                            No se encontraron registros activos para la selección actual.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     );
 }
+
