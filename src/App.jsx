@@ -7,7 +7,7 @@ import InsuranceBanner from './components/InsuranceBanner';
 import Bodywork from './components/Bodywork';
 import Services from './components/Services';
 import Metrics from './components/Metrics';
-import Team from './components/Team';
+
 import Contact from './components/Contact';
 import Blog from './components/Blog';
 import OilBanner from './components/OilBanner';
@@ -27,7 +27,7 @@ function HomePage() {
       <Services />
       <Metrics />
       <Testimonials />
-      <Team />
+
       <Contact />
       <OilBanner />
       <Blog />
