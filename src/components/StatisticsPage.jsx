@@ -103,6 +103,12 @@ export default function StatisticsPage() {
             .map(([name, value]) => ({ name, value }))
             .sort((a, b) => b.value - a.value);
 
+        // Consolidated Origins (Particular + Each Insurer)
+        counts.originsData = [
+            { name: 'Particulares', value: records.filter(r => r.seguro?.toLowerCase() === 'particular').length },
+            ...counts.insurersData
+        ].filter(o => o.value > 0);
+
         return counts;
     };
 
@@ -223,13 +229,13 @@ export default function StatisticsPage() {
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie
-                                            data={stats.clientTypesData}
+                                            data={stats.originsData}
                                             innerRadius={60}
                                             outerRadius={80}
                                             paddingAngle={5}
                                             dataKey="value"
                                         >
-                                            {stats.clientTypesData.map((entry, index) => (
+                                            {stats.originsData.map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                             ))}
                                         </Pie>
