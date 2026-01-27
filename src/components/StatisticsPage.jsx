@@ -110,7 +110,16 @@ export default function StatisticsPage() {
             { name: 'Aceite', value: targetData.filter(r => r.tipo?.toLowerCase().includes('aceite')).length }
         ];
 
-        return { ...counts, insurersData, originsData, servicesData, targetData };
+        // Calculate 'today' stats for the mini-overview
+        const todayData = data.filter(r => r.fechaInspeccion === today);
+        const todayStats = {
+            total: todayData.length,
+            inspecciones: todayData.filter(r => r.tipo === 'Inspección').length,
+            reparaciones: todayData.filter(r => r.tipo?.includes('Reparación') || r.tipo?.includes('Mecánica')).length,
+            finalizados: todayData.filter(r => r.estado === 'Finalizado').length,
+        };
+
+        return { ...counts, insurersData, originsData, servicesData, targetData, today: todayStats };
     }, [data, filters.mes, filters.anio, summaryPeriod]);
 
     const filteredTableData = useMemo(() => {
@@ -271,7 +280,7 @@ export default function StatisticsPage() {
                                 <div>
                                     <strong>{ins.value}</strong>
                                     <small style={{ marginLeft: '5px', color: 'var(--stat-text-muted)' }}>
-                                        ({((ins.value / stats.overview.total) * 100).toFixed(1)}%)
+                                        ({((ins.value / stats.total) * 100).toFixed(1)}%)
                                     </small>
                                 </div>
                             </div>
