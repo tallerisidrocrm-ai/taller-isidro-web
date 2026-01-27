@@ -24,6 +24,7 @@ const MOCK_RECORDS = [
 
 export default function StatisticsPage() {
     const [data, setData] = useState([]);
+    const [summaryPeriod, setSummaryPeriod] = useState('monthly'); // 'daily', 'monthly', 'annual'
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
         estado: '',
@@ -54,83 +55,66 @@ export default function StatisticsPage() {
         return () => clearInterval(interval);
     }, []);
 
-    const calculateAdvancedStats = (records) => {
+    const stats = useMemo(() => {
         const today = new Date().toISOString().split('T')[0];
+        const currentMonth = filters.mes;
+        const currentYear = filters.anio;
 
+        const getPeriodData = (period) => {
+            if (period === 'daily') {
+                return data.filter(r => r.fechaInspeccion === today);
+            }
+            if (period === 'monthly') {
+                return data.filter(r => {
+                    const d = new Date(r.fechaInspeccion);
+                    return d.getMonth().toString() === currentMonth && d.getFullYear().toString() === currentYear;
+                });
+            }
+            if (period === 'annual') {
+                return data.filter(r => new Date(r.fechaInspeccion).getFullYear().toString() === currentYear);
+            }
+            return data;
+        };
+
+        const targetData = getPeriodData(summaryPeriod);
+
+        // Basic counts for KPIs
         const counts = {
-            overview: {
-                total: records.length,
-                inspecciones: records.filter(r => r.tipo === 'Inspección').length,
-                reparaciones: records.filter(r => r.tipo?.includes('Reparación') || r.tipo?.includes('Mecánica') || r.tipo?.includes('Chapa')).length,
-                finalizados: records.filter(r => r.estado === 'Finalizado').length,
-            },
-            today: {
-                total: 0,
-                inspecciones: 0,
-                reparaciones: 0,
-                finalizados: 0
-            },
-            clientTypesData: [
-                { name: 'Particulares', value: records.filter(r => r.seguro?.toLowerCase() === 'particular').length },
-                { name: 'Por Seguro', value: records.filter(r => r.seguro?.toLowerCase() !== 'particular').length }
-            ],
-            servicesData: [
-                { name: 'Chapa', value: records.filter(r => r.tipo?.toLowerCase().includes('chapa')).length },
-                { name: 'Mecánica', value: records.filter(r => r.tipo?.toLowerCase().includes('mecánica')).length },
-                { name: 'Reparación', value: records.filter(r => r.tipo?.toLowerCase().includes('reparación')).length },
-                { name: 'Aceite', value: records.filter(r => r.tipo?.toLowerCase().includes('aceite')).length }
-            ],
+            total: targetData.length,
+            inspecciones: targetData.filter(r => r.tipo === 'Inspección').length,
+            reparaciones: targetData.filter(r => r.tipo?.includes('Reparación') || r.tipo?.includes('Mecánica') || r.tipo?.includes('Chapa')).length,
+            finalizados: targetData.filter(r => r.estado === 'Finalizado').length,
             insurers: {}
         };
 
-        records.forEach(r => {
-            // Daily check
-            if (r.fechaInspeccion === today) {
-                counts.today.total++;
-                if (r.tipo === 'Inspección') counts.today.inspecciones++;
-                if (r.tipo?.includes('Reparación') || r.tipo?.includes('Mecánica')) counts.today.reparaciones++;
-                if (r.estado === 'Finalizado') counts.today.finalizados++;
-            }
-
-            // Insurer aggregation
+        // Insurer breakdown for the selected summary period
+        targetData.forEach(r => {
             if (r.seguro && r.seguro !== 'Particular') {
                 counts.insurers[r.seguro] = (counts.insurers[r.seguro] || 0) + 1;
             }
         });
 
-        // Convert insurers to array for chart/list
-        counts.insurersData = Object.entries(counts.insurers)
+        const insurersData = Object.entries(counts.insurers)
             .map(([name, value]) => ({ name, value }))
             .sort((a, b) => b.value - a.value);
 
-        // Consolidated Origins (Particular + Each Insurer)
-        counts.originsData = [
-            { name: 'Particulares', value: records.filter(r => r.seguro?.toLowerCase() === 'particular').length },
-            ...counts.insurersData
+        const originsData = [
+            { name: 'Particulares', value: targetData.filter(r => r.seguro?.toLowerCase() === 'particular').length },
+            ...insurersData
         ].filter(o => o.value > 0);
 
-        return counts;
-    };
+        const servicesData = [
+            { name: 'Chapa', value: targetData.filter(r => r.tipo?.toLowerCase().includes('chapa')).length },
+            { name: 'Mecánica', value: targetData.filter(r => r.tipo?.toLowerCase().includes('mecánica')).length },
+            { name: 'Reparación', value: targetData.filter(r => r.tipo?.toLowerCase().includes('reparación')).length },
+            { name: 'Aceite', value: targetData.filter(r => r.tipo?.toLowerCase().includes('aceite')).length }
+        ];
 
-    const annualData = useMemo(() => {
-        return data.filter(r => {
-            const date = new Date(r.fechaInspeccion);
-            return date.getFullYear().toString() === filters.anio;
-        });
-    }, [data, filters.anio]);
-
-    const currentPeriodData = useMemo(() => {
-        if (filters.mes === 'all') return annualData;
-        return annualData.filter(r => {
-            const date = new Date(r.fechaInspeccion);
-            return date.getMonth().toString() === filters.mes;
-        });
-    }, [annualData, filters.mes]);
-
-    const stats = useMemo(() => calculateAdvancedStats(currentPeriodData), [currentPeriodData]);
+        return { ...counts, insurersData, originsData, servicesData, targetData };
+    }, [data, filters.mes, filters.anio, summaryPeriod]);
 
     const filteredTableData = useMemo(() => {
-        let result = currentPeriodData;
+        let result = stats.targetData;
         if (filters.estado) result = result.filter(r => r.estado === filters.estado);
         if (filters.seguro) result = result.filter(r => r.seguro === filters.seguro);
         if (filters.marca) result = result.filter(r =>
@@ -138,7 +122,7 @@ export default function StatisticsPage() {
             (r.patente && r.patente.toLowerCase().includes(filters.marca.toLowerCase()))
         );
         return result.sort((a, b) => new Date(b.fechaInspeccion) - new Date(a.fechaInspeccion));
-    }, [currentPeriodData, filters.estado, filters.seguro, filters.marca]);
+    }, [stats.targetData, filters.estado, filters.seguro, filters.marca]);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -149,7 +133,7 @@ export default function StatisticsPage() {
         return <div className="stats-container" style={{ textAlign: 'center' }}>Cargando estadísticas en vivo...</div>;
     }
 
-    const isAnnual = filters.mes === 'all';
+    const isAnnual = summaryPeriod === 'annual';
 
     return (
         <div className="stats-container">
@@ -160,47 +144,61 @@ export default function StatisticsPage() {
                         <span style={{ fontSize: '0.8rem', color: 'var(--stat-accent)', textTransform: 'uppercase', letterSpacing: '2px' }}>Airtable Live</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
-                    <p className="stats-subtitle">Estadísticas vinculadas a gestión real</p>
+                    <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
                 </header>
 
-                {/* Dashboard Filters */}
-                <div className="filters-dashboard">
-                    <div className="filter-group-main">
-                        <label>Periodo de Análisis</label>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <select name="mes" className="filter-input-large" value={filters.mes} onChange={handleFilterChange}>
-                                <option value="all">Resumen Anual</option>
-                                {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
-                            </select>
-                            <select name="anio" className="filter-input-large" value={filters.anio} onChange={handleFilterChange}>
-                                <option value="2024">2024</option>
-                                <option value="2025">2025</option>
-                                <option value="2026">2026</option>
-                            </select>
-                        </div>
+                {/* Dashboard Period Tabs */}
+                <div className="summary-tabs">
+                    <button
+                        className={`tab-btn ${summaryPeriod === 'daily' ? 'active' : ''}`}
+                        onClick={() => setSummaryPeriod('daily')}
+                    >Hoy</button>
+                    <button
+                        className={`tab-btn ${summaryPeriod === 'monthly' ? 'active' : ''}`}
+                        onClick={() => setSummaryPeriod('monthly')}
+                    >Mensual</button>
+                    <button
+                        className={`tab-btn ${summaryPeriod === 'annual' ? 'active' : ''}`}
+                        onClick={() => setSummaryPeriod('annual')}
+                    >Acumulado Anual</button>
+                </div>
+
+                {/* Period Selection Filters (Secondary) */}
+                <div className="filters-dashboard-mini">
+                    <div className="filter-group-row">
+                        <select name="mes" className="filter-select-sm" value={filters.mes} onChange={handleFilterChange}>
+                            {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
+                        </select>
+                        <select name="anio" className="filter-select-sm" value={filters.anio} onChange={handleFilterChange}>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                        </select>
                     </div>
                 </div>
 
                 {/* Summary Section */}
                 <div className="stats-summary-section">
                     <span className="section-label">
-                        {isAnnual ? `Resumen Consolidado ${filters.anio}` : `Resumen ${months[filters.mes]} ${filters.anio}`}
+                        {summaryPeriod === 'daily' ? `Actividad Hoy (${new Date().toLocaleDateString()})` :
+                            summaryPeriod === 'monthly' ? `Resumen ${months[filters.mes]} ${filters.anio}` :
+                                `Acumulado Consolidado ${filters.anio}`}
                     </span>
                     <div className="kpi-grid">
                         <div className="kpi-card">
-                            <div className="kpi-value">{stats.overview.total}</div>
+                            <div className="kpi-value">{stats.total}</div>
                             <div className="kpi-label">Unidades Totales</div>
                         </div>
                         <div className="kpi-card">
-                            <div className="kpi-value">{stats.overview.inspecciones}</div>
+                            <div className="kpi-value">{stats.inspecciones}</div>
                             <div className="kpi-label">Inspecciones</div>
                         </div>
                         <div className="kpi-card">
-                            <div className="kpi-value">{stats.overview.reparaciones}</div>
+                            <div className="kpi-value">{stats.reparaciones}</div>
                             <div className="kpi-label">Reparaciones/Mecánica</div>
                         </div>
                         <div className="kpi-card">
-                            <div className="kpi-value">{stats.overview.finalizados}</div>
+                            <div className="kpi-value">{stats.finalizados}</div>
                             <div className="kpi-label">Finalizados</div>
                         </div>
                     </div>
