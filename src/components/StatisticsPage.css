@@ -136,6 +136,15 @@
     border-radius: 8px;
     outline: none;
     font-size: 0.85rem;
+    appearance: none;
+    /* Modern look */
+}
+
+/* Fix visibility for dropdown options */
+.filter-input option,
+.filter-select-sm option {
+    background-color: #1a1a1a;
+    color: #ffffff;
 }
 
 .filter-input:focus {
@@ -420,9 +429,15 @@
     background: #000;
     color: #fff;
     border: 1px solid var(--stat-border);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.filter-select-sm:focus {
+    border-color: var(--stat-accent);
 }
 
 @media (max-width: 768px) {
