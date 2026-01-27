@@ -15,100 +15,116 @@
 }
 
 :root {
-    --stat-bg: #1a1a1a;
-    --stat-card: #242424;
-    --stat-accent: #FFC107;
-    --stat-text: #ffffff;
-    --stat-text-muted: #b0b0b0;
-    --stat-border: #333333;
+    --stat-bg: #0f172a;
+    /* Modern Deep Slate */
+    --stat-card: #1e293b;
+    /* Slate card */
+    --stat-accent: #6366f1;
+    /* Indigo Modern */
+    --stat-success: #10b981;
+    /* Emerald */
+    --stat-text: #f8fafc;
+    --stat-text-muted: #94a3b8;
+    --stat-border: rgba(255, 255, 255, 0.1);
+    --stat-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
 }
 
 .stats-container {
-    padding: 80px 20px 40px;
+    padding: 60px 15px 40px;
     background-color: var(--stat-bg);
+    background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, #0f172a 100%);
     min-height: 100vh;
     color: var(--stat-text);
 }
 
 .stats-header {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     text-align: center;
+    padding-top: 20px;
 }
 
 .stats-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 800;
+    background: var(--stat-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin-bottom: 5px;
 }
 
 .stats-subtitle {
     color: var(--stat-text-muted);
-    font-size: 1rem;
-    margin-bottom: 15px;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
 }
 
 .stats-summary-section {
-    margin-bottom: 30px;
+    margin-bottom: 25px;
 }
 
 .section-label {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 700;
-    color: var(--stat-accent);
+    color: #a855f7;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 12px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
     display: block;
-    border-left: 4px solid var(--stat-accent);
-    padding-left: 12px;
+    border-left: 3px solid #6366f1;
+    padding-left: 10px;
 }
 
 /* KPI Cards */
 .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
-    margin-bottom: 25px;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .kpi-card {
-    background: var(--stat-card);
-    padding: 20px;
-    border-radius: 10px;
+    background: rgba(30, 41, 59, 0.7);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 12px;
     border: 1px solid var(--stat-border);
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .kpi-card:hover {
-    transform: translateY(-3px);
-    border-color: var(--stat-accent);
+    transform: translateY(-2px);
+    border-color: #6366f1;
+    background: rgba(30, 41, 59, 0.9);
 }
 
 .kpi-value {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 900;
-    color: var(--stat-accent);
+    color: #fff;
     margin-bottom: 2px;
 }
 
-.kpi-label {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--stat-text-muted);
+/* Table and General Cards */
+.chart-card,
+.complex-card,
+.filters-dashboard,
+.data-table-container {
+    background: rgba(30, 41, 59, 0.5);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    border: 1px solid var(--stat-border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* Filters */
-.filters-bar {
-    background: var(--stat-card);
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: center;
-    border: 1px solid var(--stat-border);
+.chart-card h3,
+.complex-card h3 {
+    color: #f1f5f9;
+    font-weight: 600;
+    border-bottom: 1px solid var(--stat-border);
+    padding-bottom: 10px;
 }
 
 .filter-group {
@@ -118,17 +134,18 @@
 }
 
 .filter-group label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--stat-text-muted);
 }
 
 .filter-input {
-    background: #000;
+    background: rgba(15, 23, 42, 0.8);
     border: 1px solid var(--stat-border);
     color: #fff;
     padding: 8px 12px;
-    border-radius: 6px;
+    border-radius: 8px;
     outline: none;
+    font-size: 0.85rem;
 }
 
 .filter-input:focus {
