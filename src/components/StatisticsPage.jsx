@@ -91,25 +91,53 @@ export default function StatisticsPage() {
             'Pendiente de Repuesto': { count: 0, revenue: 0 },
             'Finalizado': { count: 0, revenue: 0 },
             'Inspección': { count: 0, revenue: 0 },
-            'Otros': { count: 0, revenue: 0 }
+            'Sin Estado': { count: 0, revenue: 0 }
         };
 
         targetData.forEach(r => {
-            const estado = r.estado || 'Sin estado';
+            const estado = (r.estado || '').trim();
             const precio = Number(r.precioBase) || 0;
 
-            if (estado.includes('Reparación')) categories['En Reparación'].count++, categories['En Reparación'].revenue += precio;
-            else if (estado.includes('Presupuesto')) categories['Presupuesto'].count++, categories['Presupuesto'].revenue += precio;
-            else if (estado.includes('Repuesto')) categories['Pendiente de Repuesto'].count++, categories['Pendiente de Repuesto'].revenue += precio;
-            else if (estado.includes('Finalizado')) categories['Finalizado'].count++, categories['Finalizado'].revenue += precio;
-            else if (estado.includes('Inspecion') || estado.includes('Inspección')) categories['Inspección'].count++, categories['Inspección'].revenue += precio;
-            else categories['Otros'].count++, categories['Otros'].revenue += precio;
+            if (estado === 'En Reparación' || estado === 'En Proceso' || estado === 'Aprobado') {
+                categories['En Reparación'].count++;
+                categories['En Reparación'].revenue += precio;
+            } else if (estado.toLowerCase().includes('presupuesto') || estado.toLowerCase().includes('pendiente')) {
+                categories['Presupuesto'].count++;
+                categories['Presupuesto'].revenue += precio;
+            } else if (estado.toLowerCase().includes('repuesto')) {
+                categories['Pendiente de Repuesto'].count++;
+                categories['Pendiente de Repuesto'].revenue += precio;
+            } else if (estado.toLowerCase().includes('finalizado') || estado.toLowerCase().includes('entregado')) {
+                categories['Finalizado'].count++;
+                categories['Finalizado'].revenue += precio;
+            } else if (estado.toLowerCase().includes('inspeccion') || estado.toLowerCase().includes('inspección') || estado.toLowerCase().includes('inspecion')) {
+                categories['Inspección'].count++;
+                categories['Inspección'].revenue += precio;
+            } else {
+                categories['Sin Estado'].count++;
+                categories['Sin Estado'].revenue += precio;
+            }
         });
+
+        // Consistency fix: Ensure todayStats uses the exact same logic as the main categories
+        const todayData = data.filter(r => r.fechaInspeccion === today);
+        const getStatsForSet = (resultSet) => {
+            const tempCats = { insp: 0, rep: 0, pres: 0 };
+            resultSet.forEach(r => {
+                const est = (r.estado || '').toLowerCase();
+                if (est.includes('inspeccion') || est.includes('inspección') || est.includes('inspecion')) tempCats.insp++;
+                else if (est.includes('reparación') || est === 'en proceso' || est === 'aprobado') tempCats.rep++;
+                else if (est.includes('presupuesto') || est.includes('pendiente')) tempCats.pres++;
+            });
+            return tempCats;
+        };
+
+        const todaySummary = getStatsForSet(todayData);
 
         // Insurer breakdown
         const insurers = {};
         targetData.forEach(r => {
-            if (r.seguro && r.seguro !== 'Particular' && r.seguro !== 'S/D') {
+            if (r.seguro && r.seguro !== 'Particular' && r.seguro !== 'S/D' && r.seguro !== 'N/A') {
                 insurers[r.seguro] = (insurers[r.seguro] || 0) + 1;
             }
         });
@@ -123,14 +151,18 @@ export default function StatisticsPage() {
             ...insurersData
         ].filter(o => o.value > 0);
 
-        // Calculate 'today' stats using the new categories
-        const todayData = data.filter(r => r.fechaInspeccion === today);
         const todayStats = {
             total: todayData.length,
-            inspecciones: todayData.filter(r => r.estado?.includes('Inspecion') || r.estado?.includes('Inspección')).length,
-            reparaciones: todayData.filter(r => r.estado?.includes('Reparación')).length,
-            presupuestos: todayData.filter(r => r.estado?.includes('Presupuesto')).length,
+            inspecciones: todaySummary.insp,
+            reparaciones: todaySummary.rep,
+            presupuestos: todaySummary.pres,
         };
+
+        console.log("Categories:", categories);
+        console.log("Insurers Data:", insurersData);
+        console.log("Origins Data:", originsData);
+        console.log("Today Stats:", todayStats);
+        console.groupEnd();
 
         return {
             total: targetData.length,
