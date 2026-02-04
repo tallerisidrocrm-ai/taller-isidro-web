@@ -90,6 +90,9 @@ export default function StatisticsPage() {
             'Presupuesto': { count: 0, revenue: 0 },
             'Inspección': { count: 0, revenue: 0 },
             'Finalizado': { count: 0, revenue: 0 },
+            'Turno Asignado': { count: 0, revenue: 0 },
+            'Pendiente de Repuesto': { count: 0, revenue: 0 },
+            'Inspección final': { count: 0, revenue: 0 },
             'Sin estado definido': { count: 0, revenue: 0 }
         };
 
@@ -104,10 +107,19 @@ export default function StatisticsPage() {
             } else if (estado === 'Presupuesto' || estado.toLowerCase().includes('presupuesto')) {
                 categories['Presupuesto'].count++;
                 categories['Presupuesto'].revenue += precio;
-            } else if (estado === 'Inspecion' || estado === 'Inspección' || estado.toLowerCase().includes('inspec')) {
+            } else if (estado === 'Inspecion' || estado === 'Inspección' || estado.toLowerCase().includes('inspeccion') || estado.toLowerCase().includes('inspec')) {
                 categories['Inspección'].count++;
                 categories['Inspección'].revenue += precio;
-            } else if (estado === 'Finalizado' || estado.toLowerCase().includes('finalizado') || estado.toLowerCase().includes('entregado')) {
+            } else if (estado === 'Turno Asignado') {
+                categories['Turno Asignado'].count++;
+                categories['Turno Asignado'].revenue += precio;
+            } else if (estado === 'Pendiente de Repuesto') {
+                categories['Pendiente de Repuesto'].count++;
+                categories['Pendiente de Repuesto'].revenue += precio;
+            } else if (estado === 'Inspeccion final') {
+                categories['Inspección final'].count++;
+                categories['Inspección final'].revenue += precio;
+            } else if (estado.toLowerCase() === 'finalizado' || estado.toLowerCase().includes('entregado')) {
                 categories['Finalizado'].count++;
                 categories['Finalizado'].revenue += precio;
             } else {
