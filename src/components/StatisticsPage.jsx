@@ -84,36 +84,37 @@ export default function StatisticsPage() {
 
         const targetData = getPeriodData(summaryPeriod);
 
-        // Basic counts and revenue for KPIs
-        const counts = {
-            total: targetData.length,
-            inspecciones: targetData.filter(r => r.tipo?.toLowerCase().includes('inspección') || r.estado?.toLowerCase().includes('inspecion')).length,
-            reparaciones: targetData.filter(r => r.estado === 'En Proceso' || r.estado === 'Aprobado').length,
-            presupuestos: targetData.filter(r =>
-                r.estado?.toLowerCase().includes('pendiente') ||
-                r.tipo?.toLowerCase().includes('presupuesto') ||
-                r.estado?.toLowerCase().includes('presupuesto')
-            ).length,
-            revenue: {
-                inspecciones: targetData.filter(r => r.tipo?.toLowerCase().includes('inspección') || r.estado?.toLowerCase().includes('inspecion')).reduce((acc, r) => acc + (Number(r.precioBase) || 0), 0),
-                reparaciones: targetData.filter(r => r.estado === 'En Proceso' || r.estado === 'Aprobado').reduce((acc, r) => acc + (Number(r.precioBase) || 0), 0),
-                presupuestos: targetData.filter(r =>
-                    r.estado?.toLowerCase().includes('pendiente') ||
-                    r.tipo?.toLowerCase().includes('presupuesto') ||
-                    r.estado?.toLowerCase().includes('presupuesto')
-                ).reduce((acc, r) => acc + (Number(r.precioBase) || 0), 0),
-            },
-            insurers: {}
+        // Precise mapping based on 'Estado del Proceso' column
+        const categories = {
+            'En Reparación': { count: 0, revenue: 0 },
+            'Presupuesto': { count: 0, revenue: 0 },
+            'Pendiente de Repuesto': { count: 0, revenue: 0 },
+            'Finalizado': { count: 0, revenue: 0 },
+            'Inspección': { count: 0, revenue: 0 },
+            'Otros': { count: 0, revenue: 0 }
         };
 
-        // Insurer breakdown for the selected summary period
         targetData.forEach(r => {
-            if (r.seguro && r.seguro !== 'Particular') {
-                counts.insurers[r.seguro] = (counts.insurers[r.seguro] || 0) + 1;
+            const estado = r.estado || 'Sin estado';
+            const precio = Number(r.precioBase) || 0;
+
+            if (estado.includes('Reparación')) categories['En Reparación'].count++, categories['En Reparación'].revenue += precio;
+            else if (estado.includes('Presupuesto')) categories['Presupuesto'].count++, categories['Presupuesto'].revenue += precio;
+            else if (estado.includes('Repuesto')) categories['Pendiente de Repuesto'].count++, categories['Pendiente de Repuesto'].revenue += precio;
+            else if (estado.includes('Finalizado')) categories['Finalizado'].count++, categories['Finalizado'].revenue += precio;
+            else if (estado.includes('Inspecion') || estado.includes('Inspección')) categories['Inspección'].count++, categories['Inspección'].revenue += precio;
+            else categories['Otros'].count++, categories['Otros'].revenue += precio;
+        });
+
+        // Insurer breakdown
+        const insurers = {};
+        targetData.forEach(r => {
+            if (r.seguro && r.seguro !== 'Particular' && r.seguro !== 'S/D') {
+                insurers[r.seguro] = (insurers[r.seguro] || 0) + 1;
             }
         });
 
-        const insurersData = Object.entries(counts.insurers)
+        const insurersData = Object.entries(insurers)
             .map(([name, value]) => ({ name, value }))
             .sort((a, b) => b.value - a.value);
 
@@ -122,27 +123,23 @@ export default function StatisticsPage() {
             ...insurersData
         ].filter(o => o.value > 0);
 
-        const servicesData = [
-            { name: 'Chapa', value: targetData.filter(r => r.tipo?.toLowerCase().includes('chapa')).length },
-            { name: 'Mecánica', value: targetData.filter(r => r.tipo?.toLowerCase().includes('mecánica')).length },
-            { name: 'Reparación', value: targetData.filter(r => r.tipo?.toLowerCase().includes('reparación')).length },
-            { name: 'Aceite', value: targetData.filter(r => r.tipo?.toLowerCase().includes('aceite')).length }
-        ];
-
-        // Calculate 'today' stats for the mini-overview
+        // Calculate 'today' stats using the new categories
         const todayData = data.filter(r => r.fechaInspeccion === today);
         const todayStats = {
             total: todayData.length,
-            inspecciones: todayData.filter(r => r.tipo?.toLowerCase().includes('inspección') || r.estado?.toLowerCase().includes('inspecion')).length,
-            reparaciones: todayData.filter(r => r.estado === 'En Proceso' || r.estado === 'Aprobado').length,
-            presupuestos: todayData.filter(r =>
-                r.estado?.toLowerCase().includes('pendiente') ||
-                r.tipo?.toLowerCase().includes('presupuesto') ||
-                r.estado?.toLowerCase().includes('presupuesto')
-            ).length,
+            inspecciones: todayData.filter(r => r.estado?.includes('Inspecion') || r.estado?.includes('Inspección')).length,
+            reparaciones: todayData.filter(r => r.estado?.includes('Reparación')).length,
+            presupuestos: todayData.filter(r => r.estado?.includes('Presupuesto')).length,
         };
 
-        return { ...counts, insurersData, originsData, servicesData, targetData, today: todayStats };
+        return {
+            total: targetData.length,
+            categories,
+            insurersData,
+            originsData,
+            targetData,
+            today: todayStats
+        };
     }, [data, filters.mes, filters.anio, summaryPeriod]);
 
     const filteredTableData = useMemo(() => {
@@ -241,19 +238,19 @@ export default function StatisticsPage() {
                             <div className="kpi-label">Unidades Totales</div>
                         </div>
                         <div className="kpi-card">
-                            <div className="kpi-value">{stats.inspecciones}</div>
-                            <div className="kpi-label">Inspecciones</div>
-                            <div className="kpi-revenue">${stats.revenue.inspecciones.toLocaleString()}</div>
-                        </div>
-                        <div className="kpi-card">
-                            <div className="kpi-value">{stats.reparaciones}</div>
+                            <div className="kpi-value">{stats.categories['En Reparación'].count}</div>
                             <div className="kpi-label">En Reparación</div>
-                            <div className="kpi-revenue">${stats.revenue.reparaciones.toLocaleString()}</div>
+                            <div className="kpi-revenue">${stats.categories['En Reparación'].revenue.toLocaleString()}</div>
                         </div>
                         <div className="kpi-card">
-                            <div className="kpi-value">{stats.presupuestos}</div>
+                            <div className="kpi-value">{stats.categories['Presupuesto'].count}</div>
                             <div className="kpi-label">Presupuestos</div>
-                            <div className="kpi-revenue">${stats.revenue.presupuestos.toLocaleString()}</div>
+                            <div className="kpi-revenue">${stats.categories['Presupuesto'].revenue.toLocaleString()}</div>
+                        </div>
+                        <div className="kpi-card">
+                            <div className="kpi-value">{stats.categories['Finalizado'].count}</div>
+                            <div className="kpi-label">Finalizados</div>
+                            <div className="kpi-revenue">${stats.categories['Finalizado'].revenue.toLocaleString()}</div>
                         </div>
                     </div>
                 </div>
@@ -335,11 +332,16 @@ export default function StatisticsPage() {
                     </div>
 
                     <div className="complex-card">
-                        <h3>Categorías de Servicio</h3>
-                        {stats.servicesData.map((ser, i) => (
+                        <h3>Detalle por Estado (Airtable)</h3>
+                        {Object.entries(stats.categories).map(([name, data], i) => (
                             <div key={i} className="stat-row">
-                                <span>{ser.name}</span>
-                                <strong>{ser.value} unidades</strong>
+                                <span>{name}</span>
+                                <div>
+                                    <strong>{data.count}</strong>
+                                    <small style={{ marginLeft: '10px', color: 'var(--stat-success)' }}>
+                                        ${data.revenue.toLocaleString()}
+                                    </small>
+                                </div>
                             </div>
                         ))}
                     </div>
