@@ -1,3 +1,4 @@
+// Build trigger: v1.0.1 - Statistics update
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import React, { Suspense, lazy } from 'react';
 import TopBar from './components/TopBar';
