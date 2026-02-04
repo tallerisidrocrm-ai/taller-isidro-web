@@ -15,12 +15,9 @@ const months = [
 const COLORS = ['#FFC107', '#4CAF50', '#2196F3', '#E91E63', '#9C27B0', '#00BCD4', '#FF9800'];
 
 const MOCK_RECORDS = [
-    { id: 1, patente: 'ABC 123', cliente: 'Juan Perez', marca: 'Toyota', modelo: 'Corolla', seguro: 'Particular', estado: 'Finalizado', precioBase: 150000, calificacionCliente: 5, fechaInspeccion: '2026-01-26', tipo: 'Chapa y Pintura' },
-    { id: 2, patente: 'XYZ 789', cliente: 'Maria Garcia', marca: 'Ford', modelo: 'Fiesta', seguro: 'Fed. Patronal', estado: 'Pendiente', precioBase: 85000, calificacionCliente: 4, fechaInspeccion: '2026-01-26', tipo: 'Inspección' },
-    { id: 3, patente: 'AA 111 BB', cliente: 'Carlos Ruiz', marca: 'Honda', modelo: 'Civic', seguro: 'Particular', estado: 'Aprobado', precioBase: 120000, calificacionCliente: 5, fechaInspeccion: '2026-01-25', tipo: 'Mecánica General' },
-    { id: 4, patente: 'MM 555 NN', cliente: 'Lucia Lopez', marca: 'Fiat', modelo: 'Cronos', seguro: 'San Cristobal', estado: 'Rechazado', precioBase: 200000, calificacionCliente: 3, fechaInspeccion: '2026-01-24', tipo: 'Reparación General' },
-    { id: 5, patente: 'BB 222 CC', cliente: 'Pedro Gomez', marca: 'VW', modelo: 'Golf', seguro: 'Mapfre', estado: 'En Proceso', precioBase: 350000, calificacionCliente: 4, fechaInspeccion: '2026-01-23', tipo: 'Chapa y Pintura' },
-    { id: 6, patente: 'CC 333 DD', cliente: 'Ana Weiss', marca: 'Peugeot', modelo: '208', seguro: 'Particular', estado: 'Finalizado', precioBase: 45000, calificacionCliente: 5, fechaInspeccion: '2026-01-26', tipo: 'Cambio de Aceite' },
+    { id: 1, patente: 'ABC 123', cliente: 'Juan Perez', marca: 'Toyota', modelo: 'Corolla', seguro: 'Particular', estado: 'Pendiente', precioBase: 150000, calificacionCliente: 5, fechaInspeccion: new Date().toISOString().split('T')[0], tipo: 'Presupuesto' },
+    { id: 2, patente: 'XYZ 789', cliente: 'Maria Garcia', marca: 'Ford', modelo: 'Fiesta', seguro: 'Fed. Patronal', estado: 'Inspecion', precioBase: 85000, calificacionCliente: 4, fechaInspeccion: new Date().toISOString().split('T')[0], tipo: 'Inspección' },
+    { id: 3, patente: 'AA 111 BB', cliente: 'Carlos Ruiz', marca: 'Honda', modelo: 'Civic', seguro: 'Particular', estado: 'Aprobado', precioBase: 120000, calificacionCliente: 5, fechaInspeccion: new Date().toISOString().split('T')[0], tipo: 'Reparación' },
 ];
 
 export default function StatisticsPage() {
@@ -180,7 +177,7 @@ export default function StatisticsPage() {
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <div className="pulse-dot"></div>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--stat-accent)', textTransform: 'uppercase', letterSpacing: '2px' }}>Airtable Live</span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--stat-accent)', textTransform: 'uppercase', letterSpacing: '2px' }}>Airtable Live (v1.0.2)</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
                     <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
