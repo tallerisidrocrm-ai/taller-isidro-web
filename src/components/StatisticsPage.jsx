@@ -84,38 +84,35 @@ export default function StatisticsPage() {
 
         const targetData = getPeriodData(summaryPeriod);
 
-        // Precise mapping based on 'Estado del Proceso' column
+        // Precise mapping aligned with USER's Airtable values
         const categories = {
             'En Reparación': { count: 0, revenue: 0 },
             'Presupuesto': { count: 0, revenue: 0 },
-            'Pendiente de Repuesto': { count: 0, revenue: 0 },
-            'Finalizado': { count: 0, revenue: 0 },
             'Inspección': { count: 0, revenue: 0 },
-            'Sin Estado': { count: 0, revenue: 0 }
+            'Finalizado': { count: 0, revenue: 0 },
+            'Sin estado definido': { count: 0, revenue: 0 }
         };
 
         targetData.forEach(r => {
             const estado = (r.estado || '').trim();
             const precio = Number(r.precioBase) || 0;
 
-            if (estado === 'En Reparación' || estado === 'En Proceso' || estado === 'Aprobado') {
+            // Match exact strings from Airtable
+            if (estado === 'En Reparacion' || estado === 'En Reparación' || estado === 'En Proceso' || estado === 'Aprobado') {
                 categories['En Reparación'].count++;
                 categories['En Reparación'].revenue += precio;
-            } else if (estado.toLowerCase().includes('presupuesto') || estado.toLowerCase().includes('pendiente')) {
+            } else if (estado === 'Presupuesto' || estado.toLowerCase().includes('presupuesto')) {
                 categories['Presupuesto'].count++;
                 categories['Presupuesto'].revenue += precio;
-            } else if (estado.toLowerCase().includes('repuesto')) {
-                categories['Pendiente de Repuesto'].count++;
-                categories['Pendiente de Repuesto'].revenue += precio;
-            } else if (estado.toLowerCase().includes('finalizado') || estado.toLowerCase().includes('entregado')) {
-                categories['Finalizado'].count++;
-                categories['Finalizado'].revenue += precio;
-            } else if (estado.toLowerCase().includes('inspeccion') || estado.toLowerCase().includes('inspección') || estado.toLowerCase().includes('inspecion')) {
+            } else if (estado === 'Inspecion' || estado === 'Inspección' || estado.toLowerCase().includes('inspec')) {
                 categories['Inspección'].count++;
                 categories['Inspección'].revenue += precio;
+            } else if (estado === 'Finalizado' || estado.toLowerCase().includes('finalizado') || estado.toLowerCase().includes('entregado')) {
+                categories['Finalizado'].count++;
+                categories['Finalizado'].revenue += precio;
             } else {
-                categories['Sin Estado'].count++;
-                categories['Sin Estado'].revenue += precio;
+                categories['Sin estado definido'].count++;
+                categories['Sin estado definido'].revenue += precio;
             }
         });
 
@@ -124,10 +121,12 @@ export default function StatisticsPage() {
         const getStatsForSet = (resultSet) => {
             const tempCats = { insp: 0, rep: 0, pres: 0 };
             resultSet.forEach(r => {
-                const est = (r.estado || '').toLowerCase();
-                if (est.includes('inspeccion') || est.includes('inspección') || est.includes('inspecion')) tempCats.insp++;
-                else if (est.includes('reparación') || est === 'en proceso' || est === 'aprobado') tempCats.rep++;
-                else if (est.includes('presupuesto') || est.includes('pendiente')) tempCats.pres++;
+                const est = (r.estado || '').trim();
+                const estLower = est.toLowerCase();
+
+                if (est === 'Inspecion' || estLower.includes('inspeccion') || estLower.includes('inspec')) tempCats.insp++;
+                else if (est === 'En Reparacion' || estLower.includes('reparaci') || estLower === 'en proceso' || estLower === 'aprobado') tempCats.rep++;
+                else if (estLower.includes('presupuesto')) tempCats.pres++;
             });
             return tempCats;
         };
