@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { dataService } from '../services/dataService';
+import SEO from './SEO';
 import {
     PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
     BarChart, Bar, XAxis, YAxis, CartesianGrid
@@ -26,6 +27,7 @@ export default function StatisticsPage() {
     const [data, setData] = useState([]);
     const [summaryPeriod, setSummaryPeriod] = useState('monthly'); // 'daily', 'monthly', 'annual'
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(null);
     const [filters, setFilters] = useState({
         estado: '',
         seguro: '',
@@ -40,10 +42,16 @@ export default function StatisticsPage() {
                 const records = await dataService.getStatisticsData();
                 if (records && records.length > 0) {
                     setData(records);
-                } else {
+                    setFetchError(null);
+                } else if (records === null) {
+                    setFetchError('Error de conexión con el servidor de datos (CORS o Red).');
                     setData(MOCK_RECORDS);
+                } else {
+                    setData(records || []);
+                    setFetchError(null);
                 }
             } catch {
+                setFetchError('Error al procesar los datos.');
                 setData(MOCK_RECORDS);
             } finally {
                 setLoading(false);
@@ -51,7 +59,7 @@ export default function StatisticsPage() {
         };
         loadData();
 
-        const interval = setInterval(loadData, 300000); // Polling 5min
+        const interval = setInterval(loadData, 30000); // Polling 30 seconds for live updates
         return () => clearInterval(interval);
     }, []);
 
@@ -78,12 +86,25 @@ export default function StatisticsPage() {
 
         const targetData = getPeriodData(summaryPeriod);
 
-        // Basic counts for KPIs
+        // Basic counts and revenue for KPIs
         const counts = {
             total: targetData.length,
-            inspecciones: targetData.filter(r => r.tipo === 'Inspección').length,
-            reparaciones: targetData.filter(r => r.tipo?.includes('Reparación') || r.tipo?.includes('Mecánica') || r.tipo?.includes('Chapa')).length,
-            finalizados: targetData.filter(r => r.estado === 'Finalizado').length,
+            inspecciones: targetData.filter(r => r.tipo?.toLowerCase().includes('inspección') || r.estado?.toLowerCase().includes('inspecion')).length,
+            reparaciones: targetData.filter(r => r.estado === 'En Proceso' || r.estado === 'Aprobado').length,
+            presupuestos: targetData.filter(r =>
+                r.estado?.toLowerCase().includes('pendiente') ||
+                r.tipo?.toLowerCase().includes('presupuesto') ||
+                r.estado?.toLowerCase().includes('presupuesto')
+            ).length,
+            revenue: {
+                inspecciones: targetData.filter(r => r.tipo?.toLowerCase().includes('inspección') || r.estado?.toLowerCase().includes('inspecion')).reduce((acc, r) => acc + (Number(r.precioBase) || 0), 0),
+                reparaciones: targetData.filter(r => r.estado === 'En Proceso' || r.estado === 'Aprobado').reduce((acc, r) => acc + (Number(r.precioBase) || 0), 0),
+                presupuestos: targetData.filter(r =>
+                    r.estado?.toLowerCase().includes('pendiente') ||
+                    r.tipo?.toLowerCase().includes('presupuesto') ||
+                    r.estado?.toLowerCase().includes('presupuesto')
+                ).reduce((acc, r) => acc + (Number(r.precioBase) || 0), 0),
+            },
             insurers: {}
         };
 
@@ -114,9 +135,13 @@ export default function StatisticsPage() {
         const todayData = data.filter(r => r.fechaInspeccion === today);
         const todayStats = {
             total: todayData.length,
-            inspecciones: todayData.filter(r => r.tipo === 'Inspección').length,
-            reparaciones: todayData.filter(r => r.tipo?.includes('Reparación') || r.tipo?.includes('Mecánica')).length,
-            finalizados: todayData.filter(r => r.estado === 'Finalizado').length,
+            inspecciones: todayData.filter(r => r.tipo?.toLowerCase().includes('inspección') || r.estado?.toLowerCase().includes('inspecion')).length,
+            reparaciones: todayData.filter(r => r.estado === 'En Proceso' || r.estado === 'Aprobado').length,
+            presupuestos: todayData.filter(r =>
+                r.estado?.toLowerCase().includes('pendiente') ||
+                r.tipo?.toLowerCase().includes('presupuesto') ||
+                r.estado?.toLowerCase().includes('presupuesto')
+            ).length,
         };
 
         return { ...counts, insurersData, originsData, servicesData, targetData, today: todayStats };
@@ -146,6 +171,11 @@ export default function StatisticsPage() {
 
     return (
         <div className="stats-container">
+            <SEO
+                title="Panel de Estadísticas y Control"
+                description="Acceso exclusivo al panel de control de Taller Isidro. Monitoreo en vivo de unidades, inspecciones y reparaciones."
+                noindex={true}
+            />
             <div className="container">
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
@@ -154,6 +184,20 @@ export default function StatisticsPage() {
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
                     <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
+
+                    {fetchError && (
+                        <div style={{
+                            background: 'rgba(211, 47, 47, 0.1)',
+                            color: '#D32F2F',
+                            padding: '10px',
+                            borderRadius: '8px',
+                            marginBottom: '20px',
+                            border: '1px solid #D32F2F',
+                            fontSize: '0.9rem'
+                        }}>
+                            ⚠️ {fetchError} - Mostrando datos de respaldo.
+                        </div>
+                    )}
                 </header>
 
                 {/* Dashboard Period Tabs */}
@@ -201,14 +245,17 @@ export default function StatisticsPage() {
                         <div className="kpi-card">
                             <div className="kpi-value">{stats.inspecciones}</div>
                             <div className="kpi-label">Inspecciones</div>
+                            <div className="kpi-revenue">${stats.revenue.inspecciones.toLocaleString()}</div>
                         </div>
                         <div className="kpi-card">
                             <div className="kpi-value">{stats.reparaciones}</div>
-                            <div className="kpi-label">Reparaciones/Mecánica</div>
+                            <div className="kpi-label">En Reparación</div>
+                            <div className="kpi-revenue">${stats.revenue.reparaciones.toLocaleString()}</div>
                         </div>
                         <div className="kpi-card">
-                            <div className="kpi-value">{stats.finalizados}</div>
-                            <div className="kpi-label">Finalizados</div>
+                            <div className="kpi-value">{stats.presupuestos}</div>
+                            <div className="kpi-label">Presupuestos</div>
+                            <div className="kpi-revenue">${stats.revenue.presupuestos.toLocaleString()}</div>
                         </div>
                     </div>
                 </div>
@@ -221,7 +268,7 @@ export default function StatisticsPage() {
                             <div className="stat-card-mini"><span>Entradas:</span> <strong>{stats.today.total}</strong></div>
                             <div className="stat-card-mini"><span>Insp:</span> <strong>{stats.today.inspecciones}</strong></div>
                             <div className="stat-card-mini"><span>Rep:</span> <strong>{stats.today.reparaciones}</strong></div>
-                            <div className="stat-card-mini"><span>Fin:</span> <strong>{stats.today.finalizados}</strong></div>
+                            <div className="stat-card-mini"><span>Presup:</span> <strong>{stats.today.presupuestos}</strong></div>
                         </div>
                     </div>
                 )}

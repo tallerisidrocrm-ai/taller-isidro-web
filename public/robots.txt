@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /estadisticas
 
 Sitemap: https://tallerisidro.cloud/sitemap.xml

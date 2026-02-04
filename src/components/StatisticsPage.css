@@ -98,6 +98,14 @@
     margin-bottom: 2px;
 }
 
+.kpi-revenue {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--stat-success);
+    margin-top: 5px;
+    opacity: 0.9;
+}
+
 /* Table and General Cards */
 .chart-card,
 .complex-card,

@@ -3,7 +3,7 @@ import { businessConfig } from '../config';
 export default function Contact() {
     return (
         <section id="contact" className="section-padding">
-            <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px' }}>
+            <div className="container grid-2-cols">
                 <div>
                     <span className="section-title-small">Contactanos</span>
                     <h2 className="section-title-large">Llamanos para <br /> Más Detalles</h2>

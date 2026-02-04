@@ -47,6 +47,16 @@ button {
   outline: none;
 }
 
+/* Global Reset for Form Elements to prevent border cut-off */
+input,
+textarea,
+select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
 .container {
   width: 90%;
   max-width: var(--max-width);
