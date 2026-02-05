@@ -33,6 +33,7 @@ export default function StatisticsPage() {
         mes: new Date().getMonth().toString(),
         anio: new Date().getFullYear().toString()
     });
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -62,13 +63,12 @@ export default function StatisticsPage() {
     }, []);
 
     const stats = useMemo(() => {
-        const today = new Date().toISOString().split('T')[0];
         const currentMonth = filters.mes;
         const currentYear = filters.anio;
 
         const getPeriodData = (period) => {
             if (period === 'daily') {
-                return data.filter(r => r.fechaInspeccion === today);
+                return data.filter(r => r.fechaInspeccion === selectedDate);
             }
             if (period === 'monthly') {
                 return data.filter(r => {
@@ -128,10 +128,14 @@ export default function StatisticsPage() {
             }
         });
 
-        // Consistency fix: Ensure todayStats uses the exact same logic as the main categories
-        const todayData = data.filter(r => r.fechaInspeccion === today);
+        // Calculate stats for the selected day (only consistent if showing daily view, but useful to have)
+        const dailyData = data.filter(r => r.fechaInspeccion === selectedDate);
+
         const getStatsForSet = (resultSet) => {
-            const tempCats = { insp: 0, rep: 0, pres: 0 };
+            const tempCats = {
+                insp: 0, rep: 0, pres: 0,
+                turno: 0, pendRep: 0, inspFinal: 0, finalizado: 0
+            };
             resultSet.forEach(r => {
                 const est = (r.estado || '').trim();
                 const estLower = est.toLowerCase();
@@ -139,11 +143,15 @@ export default function StatisticsPage() {
                 if (est === 'Inspecion' || estLower.includes('inspeccion') || estLower.includes('inspec')) tempCats.insp++;
                 else if (est === 'En Reparacion' || estLower.includes('reparaci') || estLower === 'en proceso' || estLower === 'aprobado') tempCats.rep++;
                 else if (estLower.includes('presupuesto')) tempCats.pres++;
+                else if (est === 'Turno Asignado') tempCats.turno++;
+                else if (est === 'Pendiente de Repuesto') tempCats.pendRep++;
+                else if (est === 'Inspeccion final') tempCats.inspFinal++;
+                else if (estLower === 'finalizado' || estLower.includes('entregado')) tempCats.finalizado++;
             });
             return tempCats;
         };
 
-        const todaySummary = getStatsForSet(todayData);
+        const dailySummary = getStatsForSet(dailyData);
 
         // Insurer breakdown
         const insurers = {};
@@ -162,17 +170,19 @@ export default function StatisticsPage() {
             ...insurersData
         ].filter(o => o.value > 0);
 
-        const todayStats = {
-            total: todayData.length,
-            inspecciones: todaySummary.insp,
-            reparaciones: todaySummary.rep,
-            presupuestos: todaySummary.pres,
+        const dailyStats = {
+            total: dailyData.length,
+            inspecciones: dailySummary.insp,
+            reparaciones: dailySummary.rep,
+            presupuestos: dailySummary.pres,
+            turnos: dailySummary.turno,
+            pendRep: dailySummary.pendRep,
+            inspFinal: dailySummary.inspFinal,
+            finalizado: dailySummary.finalizado
         };
 
         console.log("Categories:", categories);
-        console.log("Insurers Data:", insurersData);
-        console.log("Origins Data:", originsData);
-        console.log("Today Stats:", todayStats);
+        console.log("Daily Stats:", dailyStats);
         console.groupEnd();
 
         return {
@@ -181,9 +191,9 @@ export default function StatisticsPage() {
             insurersData,
             originsData,
             targetData,
-            today: todayStats
+            daily: dailyStats
         };
-    }, [data, filters.mes, filters.anio, summaryPeriod]);
+    }, [data, filters.mes, filters.anio, summaryPeriod, selectedDate]);
 
     const filteredTableData = useMemo(() => {
         let result = stats.targetData;
@@ -257,22 +267,33 @@ export default function StatisticsPage() {
 
                 {/* Period Selection Filters (Secondary) */}
                 <div className="filters-dashboard-mini">
-                    <div className="filter-group-row">
-                        <select name="mes" className="filter-select-sm" value={filters.mes} onChange={handleFilterChange}>
-                            {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
-                        </select>
-                        <select name="anio" className="filter-select-sm" value={filters.anio} onChange={handleFilterChange}>
-                            <option value="2024">2024</option>
-                            <option value="2025">2025</option>
-                            <option value="2026">2026</option>
-                        </select>
-                    </div>
+                    {summaryPeriod === 'daily' ? (
+                        <div className="filter-group-row">
+                            <input
+                                type="date"
+                                className="filter-select-sm"
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                            />
+                        </div>
+                    ) : (
+                        <div className="filter-group-row">
+                            <select name="mes" className="filter-select-sm" value={filters.mes} onChange={handleFilterChange}>
+                                {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
+                            </select>
+                            <select name="anio" className="filter-select-sm" value={filters.anio} onChange={handleFilterChange}>
+                                <option value="2024">2024</option>
+                                <option value="2025">2025</option>
+                                <option value="2026">2026</option>
+                            </select>
+                        </div>
+                    )}
                 </div>
 
                 {/* Summary Section */}
                 <div className="stats-summary-section">
                     <span className="section-label">
-                        {summaryPeriod === 'daily' ? `Actividad Hoy (${new Date().toLocaleDateString()})` :
+                        {summaryPeriod === 'daily' ? `Actividad ${new Date(selectedDate + 'T00:00:00').toLocaleDateString()}` :
                             summaryPeriod === 'monthly' ? `Resumen ${months[filters.mes]} ${filters.anio}` :
                                 `Acumulado Consolidado ${filters.anio}`}
                     </span>
@@ -284,30 +305,39 @@ export default function StatisticsPage() {
                         <div className="kpi-card">
                             <div className="kpi-value">{stats.categories['En Reparación'].count}</div>
                             <div className="kpi-label">En Reparación</div>
-                            <div className="kpi-revenue">${stats.categories['En Reparación'].revenue.toLocaleString()}</div>
                         </div>
                         <div className="kpi-card">
                             <div className="kpi-value">{stats.categories['Presupuesto'].count}</div>
                             <div className="kpi-label">Presupuestos</div>
-                            <div className="kpi-revenue">${stats.categories['Presupuesto'].revenue.toLocaleString()}</div>
                         </div>
                         <div className="kpi-card">
                             <div className="kpi-value">{stats.categories['Finalizado'].count}</div>
                             <div className="kpi-label">Finalizados</div>
-                            <div className="kpi-revenue">${stats.categories['Finalizado'].revenue.toLocaleString()}</div>
                         </div>
                     </div>
                 </div>
 
-                {/* Today Overview (Only if current year/month matches today) */}
-                {!isAnnual && parseInt(filters.mes) === new Date().getMonth() && filters.anio === new Date().getFullYear().toString() && (
+                {/* Daily Overview (Replaces old 'Active Today' block) */}
+                {summaryPeriod === 'daily' && (
                     <div className="stats-summary-section animate-fade-in">
-                        <span className="section-label" style={{ color: '#4CAF50', borderLeftColor: '#4CAF50' }}>Actividad de Hoy ({new Date().toLocaleDateString()})</span>
+                        <span className="section-label" style={{ color: '#4CAF50', borderLeftColor: '#4CAF50' }}>
+                            Actividad del Día ({new Date(selectedDate + 'T00:00:00').toLocaleDateString()})
+                        </span>
+
+                        {/* First Row: Main Counts */}
                         <div className="kpi-grid-mini">
-                            <div className="stat-card-mini"><span>Entradas:</span> <strong>{stats.today.total}</strong></div>
-                            <div className="stat-card-mini"><span>Insp:</span> <strong>{stats.today.inspecciones}</strong></div>
-                            <div className="stat-card-mini"><span>Rep:</span> <strong>{stats.today.reparaciones}</strong></div>
-                            <div className="stat-card-mini"><span>Presup:</span> <strong>{stats.today.presupuestos}</strong></div>
+                            <div className="stat-card-mini"><span>Entradas:</span> <strong>{stats.daily.total}</strong></div>
+                            <div className="stat-card-mini"><span>Insp:</span> <strong>{stats.daily.inspecciones}</strong></div>
+                            <div className="stat-card-mini"><span>Rep:</span> <strong>{stats.daily.reparaciones}</strong></div>
+                            <div className="stat-card-mini"><span>Presup:</span> <strong>{stats.daily.presupuestos}</strong></div>
+                        </div>
+
+                        {/* Second Row: Detailed Statuses */}
+                        <div className="kpi-grid-mini" style={{ marginTop: '10px' }}>
+                            <div className="stat-card-mini"><span>Turno Asign:</span> <strong>{stats.daily.turnos}</strong></div>
+                            <div className="stat-card-mini"><span>Pend. Rep:</span> <strong>{stats.daily.pendRep}</strong></div>
+                            <div className="stat-card-mini"><span>Insp. Final:</span> <strong>{stats.daily.inspFinal}</strong></div>
+                            <div className="stat-card-mini"><span>Finalizado:</span> <strong>{stats.daily.finalizado}</strong></div>
                         </div>
                     </div>
                 )}
@@ -382,9 +412,6 @@ export default function StatisticsPage() {
                                 <span>{name}</span>
                                 <div>
                                     <strong>{data.count}</strong>
-                                    <small style={{ marginLeft: '10px', color: 'var(--stat-success)' }}>
-                                        ${data.revenue.toLocaleString()}
-                                    </small>
                                 </div>
                             </div>
                         ))}
