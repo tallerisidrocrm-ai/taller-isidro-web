@@ -21,7 +21,7 @@ const MOCK_RECORDS = [
 ];
 
 export default function StatisticsPage() {
-    console.log("StatisticsPage v1.0.6 loaded - Visual & Console Check");
+    console.log("StatisticsPage v1.0.7 loaded - Visual & Console Check");
     const [data, setData] = useState([]);
     const [summaryPeriod, setSummaryPeriod] = useState('monthly'); // 'daily', 'monthly', 'annual'
     const [loading, setLoading] = useState(true);
@@ -156,8 +156,16 @@ export default function StatisticsPage() {
         // Insurer breakdown
         const insurers = {};
         targetData.forEach(r => {
-            if (r.seguro && r.seguro !== 'Particular' && r.seguro !== 'S/D' && r.seguro !== 'N/A') {
-                insurers[r.seguro] = (insurers[r.seguro] || 0) + 1;
+            let seguro = r.seguro;
+            if (seguro) {
+                // Normalization
+                if (seguro.toUpperCase() === 'FEDERACION' || seguro.toUpperCase() === 'FEDERACION PATRONAL') {
+                    seguro = 'Federación Patronal';
+                }
+
+                if (seguro !== 'Particular' && seguro !== 'S/D' && seguro !== 'N/A') {
+                    insurers[seguro] = (insurers[seguro] || 0) + 1;
+                }
             }
         });
 
@@ -229,7 +237,7 @@ export default function StatisticsPage() {
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <div className="pulse-dot"></div>
-                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>Airtable Live (v1.0.6)</span>
+                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>Airtable Live (v1.0.7)</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
                     <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
