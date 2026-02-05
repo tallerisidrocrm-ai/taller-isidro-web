@@ -21,7 +21,7 @@ const MOCK_RECORDS = [
 ];
 
 export default function StatisticsPage() {
-    console.log("StatisticsPage v1.0.7 loaded - Visual & Console Check");
+    console.log("StatisticsPage v1.0.8 loaded - Visual & Console Check");
     const [data, setData] = useState([]);
     const [summaryPeriod, setSummaryPeriod] = useState('monthly'); // 'daily', 'monthly', 'annual'
     const [loading, setLoading] = useState(true);
@@ -237,7 +237,7 @@ export default function StatisticsPage() {
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <div className="pulse-dot"></div>
-                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>Airtable Live (v1.0.7)</span>
+                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>Airtable Live (v1.0.8)</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
                     <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
@@ -325,27 +325,30 @@ export default function StatisticsPage() {
                     </div>
                 </div>
 
-                {/* Daily Overview (Replaces old 'Active Today' block) */}
-                {summaryPeriod === 'daily' && (
+                {/* Detailed Overview (Daily & Monthly) */}
+                {(summaryPeriod === 'daily' || summaryPeriod === 'monthly') && (
                     <div className="stats-summary-section animate-fade-in">
                         <span className="section-label" style={{ color: '#4CAF50', borderLeftColor: '#4CAF50' }}>
-                            Actividad del Día ({new Date(selectedDate + 'T00:00:00').toLocaleDateString()})
+                            {summaryPeriod === 'daily'
+                                ? `Detalle del Día (${new Date(selectedDate + 'T00:00:00').toLocaleDateString()})`
+                                : `Detalle Mensual (${months[parseInt(filters.mes)]} ${filters.anio})`
+                            }
                         </span>
 
                         {/* First Row: Main Counts */}
                         <div className="kpi-grid-mini">
-                            <div className="stat-card-mini"><span>Entradas:</span> <strong>{stats.daily.total}</strong></div>
-                            <div className="stat-card-mini"><span>Insp:</span> <strong>{stats.daily.inspecciones}</strong></div>
-                            <div className="stat-card-mini"><span>Rep:</span> <strong>{stats.daily.reparaciones}</strong></div>
-                            <div className="stat-card-mini"><span>Presup:</span> <strong>{stats.daily.presupuestos}</strong></div>
+                            <div className="stat-card-mini"><span>Entradas:</span> <strong>{stats.total}</strong></div>
+                            <div className="stat-card-mini"><span>Insp:</span> <strong>{stats.categories['Inspección'].count}</strong></div>
+                            <div className="stat-card-mini"><span>Rep:</span> <strong>{stats.categories['En Reparación'].count}</strong></div>
+                            <div className="stat-card-mini"><span>Presup:</span> <strong>{stats.categories['Presupuesto'].count}</strong></div>
                         </div>
 
                         {/* Second Row: Detailed Statuses */}
                         <div className="kpi-grid-mini" style={{ marginTop: '10px' }}>
-                            <div className="stat-card-mini"><span>Turno Asign:</span> <strong>{stats.daily.turnos}</strong></div>
-                            <div className="stat-card-mini"><span>Pend. Rep:</span> <strong>{stats.daily.pendRep}</strong></div>
-                            <div className="stat-card-mini"><span>Insp. Final:</span> <strong>{stats.daily.inspFinal}</strong></div>
-                            <div className="stat-card-mini"><span>Finalizado:</span> <strong>{stats.daily.finalizado}</strong></div>
+                            <div className="stat-card-mini"><span>Turno Asign:</span> <strong>{stats.categories['Turno Asignado'].count}</strong></div>
+                            <div className="stat-card-mini"><span>Pend. Rep:</span> <strong>{stats.categories['Pendiente de Repuesto'].count}</strong></div>
+                            <div className="stat-card-mini"><span>Insp. Final:</span> <strong>{stats.categories['Inspección final'].count}</strong></div>
+                            <div className="stat-card-mini"><span>Finalizado:</span> <strong>{stats.categories['Finalizado'].count}</strong></div>
                         </div>
                     </div>
                 )}
