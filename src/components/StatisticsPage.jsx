@@ -210,9 +210,10 @@ export default function StatisticsPage() {
     return (
         <div className="stats-container">
             <SEO
-                title="Panel de Estadísticas y Control"
-                description="Acceso exclusivo al panel de control de Taller Isidro. Monitoreo en vivo de unidades, inspecciones y reparaciones."
-                noindex={true}
+                title="Estadísticas en Vivo"
+                description="Panel de Control de Taller Isidro: Monitoreo en tiempo real de reparaciones, inspecciones y rendimiento operativo."
+                image="/statistics-preview.png"
+                noindex={false}
             />
             <div className="container">
                 <header className="stats-header">
