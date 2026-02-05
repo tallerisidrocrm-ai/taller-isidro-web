@@ -33,6 +33,10 @@
     background-color: var(--stat-bg);
     min-height: 100vh;
     color: var(--stat-text);
+    overflow-x: hidden;
+    /* Prevent horizontal scroll on body */
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .stats-header {
@@ -548,13 +552,36 @@ input[type="date"] {
     }
 
     .stat-card-mini strong {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 }
 
 @media (max-width: 480px) {
-    .kpi-grid {
-        grid-template-columns: 1fr 1fr;
+    .stats-container {
+        padding-top: 100px;
+        /* More space for mobile header */
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .kpi-grid,
+    .kpi-grid-mini {
+        grid-template-columns: 1fr;
+        /* Stack vertically on very small screens for better visibility */
+        gap: 12px;
+    }
+
+    .kpi-card,
+    .stat-card-mini {
+        padding: 15px;
+        background: #1e1e1e;
+        /* Slightly lighter background for contrast */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .kpi-value {
+        font-size: 2rem;
+        /* Larger numbers */
     }
 
     .stats-header {
@@ -562,7 +589,8 @@ input[type="date"] {
     }
 
     .section-label {
-        font-size: 0.8rem;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
     }
 
     /* Make table more readable on very small screens */
@@ -573,5 +601,10 @@ input[type="date"] {
 
     .data-table-container {
         border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .chart-card {
+        padding: 10px;
     }
 }
