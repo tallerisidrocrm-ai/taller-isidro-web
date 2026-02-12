@@ -254,7 +254,7 @@ export default function StatisticsPage() {
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <div className="pulse-dot"></div>
-                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>Airtable Live (v1.2.0)</span>
+                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.2.0)</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
                     <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
@@ -425,12 +425,10 @@ export default function StatisticsPage() {
                                     <BarChart data={stats.serviceTypesData}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                                         <XAxis dataKey="name" stroke="#888" fontSize={12} />
-                                        <YAxis yAxisId="left" orientation="left" stroke="#2196F3" fontSize={12} />
-                                        <YAxis yAxisId="right" orientation="right" stroke="#4CAF50" fontSize={12} tickFormatter={(value) => `$${value / 1000}k`} />
-                                        <Tooltip contentStyle={{ backgroundColor: '#242424', border: '1px solid #333' }} formatter={(value, name) => [name === 'revenue' ? `$${value.toLocaleString()}` : value, name === 'revenue' ? 'Ingresos' : 'Cantidad']} />
+                                        <YAxis orientation="left" stroke="#2196F3" fontSize={12} />
+                                        <Tooltip contentStyle={{ backgroundColor: '#242424', border: '1px solid #333' }} />
                                         <Legend />
-                                        <Bar yAxisId="left" dataKey="value" name="Cantidad" fill="#2196F3" radius={[4, 4, 0, 0]} barSize={30} />
-                                        <Bar yAxisId="right" dataKey="revenue" name="Ingresos" fill="#4CAF50" radius={[4, 4, 0, 0]} barSize={30} />
+                                        <Bar dataKey="value" name="Cantidad" fill="#2196F3" radius={[4, 4, 0, 0]} barSize={30} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
@@ -464,7 +462,6 @@ export default function StatisticsPage() {
                                 <span>{svc.name}</span>
                                 <div style={{ textAlign: 'right' }}>
                                     <div style={{ fontWeight: 'bold', color: '#fff' }}>{svc.value}</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#4CAF50' }}>${svc.revenue.toLocaleString()}</div>
                                 </div>
                             </div>
                         )) : (
@@ -473,7 +470,7 @@ export default function StatisticsPage() {
                     </div>
 
                     <div className="complex-card">
-                        <h3>Detalle por Estado (Airtable)</h3>
+                        <h3>Detalle por Estado (CRM)</h3>
                         {Object.entries(stats.categories).map(([name, data], i) => (
                             <div key={i} className="stat-row">
                                 <span>{name}</span>
