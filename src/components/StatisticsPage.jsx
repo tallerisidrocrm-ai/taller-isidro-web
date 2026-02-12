@@ -21,7 +21,7 @@ const MOCK_RECORDS = [
 ];
 
 export default function StatisticsPage() {
-    console.log("StatisticsPage v1.0.9 loaded - Visual & Console Check");
+    console.log("StatisticsPage v1.0.10 loaded - Kiosk Mode");
     const [data, setData] = useState([]);
     const [summaryPeriod, setSummaryPeriod] = useState('monthly'); // 'daily', 'monthly', 'annual'
     const [loading, setLoading] = useState(true);
@@ -34,6 +34,7 @@ export default function StatisticsPage() {
         anio: new Date().getFullYear().toString()
     });
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedRecord, setSelectedRecord] = useState(null);
 
     useEffect(() => {
         const loadData = async () => {
@@ -472,7 +473,7 @@ export default function StatisticsPage() {
                             </thead>
                             <tbody>
                                 {filteredTableData.length > 0 ? filteredTableData.map((row, i) => (
-                                    <tr key={i}>
+                                    <tr key={i} onClick={() => setSelectedRecord(row)}>
                                         <td style={{ color: 'var(--stat-text-muted)', fontSize: '0.8rem' }}>{row.fechaInspeccion}</td>
                                         <td><strong>{row.patente}</strong> <br /><small>{row.marca} {row.modelo}</small></td>
                                         <td>{row.seguro}</td>
@@ -495,7 +496,89 @@ export default function StatisticsPage() {
                     </div>
                 </div>
             </div>
+            {selectedRecord && (
+                <RecordDetailModal
+                    record={selectedRecord}
+                    onClose={() => setSelectedRecord(null)}
+                />
+            )}
         </div>
     );
 }
+
+const RecordDetailModal = ({ record, onClose }) => {
+    if (!record) return null;
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h2>
+                        <span style={{ color: '#fff' }}>{record.patente}</span>
+                        <span className={`badge badge-${record.estado?.toLowerCase().replace(' ', '')}`} style={{ fontSize: '0.6em', verticalAlign: 'middle' }}>
+                            {record.estado}
+                        </span>
+                    </h2>
+                    <button className="modal-close-btn" onClick={onClose}>&times;</button>
+                </div>
+                <div className="modal-body">
+                    <div className="detail-grid">
+                        <div className="detail-item">
+                            <span className="detail-label">Cliente</span>
+                            <span className="detail-value">{record.cliente}</span>
+                        </div>
+                        {record.telefono && (
+                            <div className="detail-item">
+                                <span className="detail-label">Teléfono</span>
+                                <span className="detail-value">{record.telefono}</span>
+                            </div>
+                        )}
+                        <div className="detail-item">
+                            <span className="detail-label">Marca / Modelo</span>
+                            <span className="detail-value">{record.marca} {record.modelo}</span>
+                        </div>
+                        <div className="detail-item">
+                            <span className="detail-label">Seguro / Origen</span>
+                            <span className="detail-value">{record.seguro}</span>
+                        </div>
+                        {record.siniestro && (
+                            <div className="detail-item">
+                                <span className="detail-label">N° Siniestro</span>
+                                <span className="detail-value">{record.siniestro}</span>
+                            </div>
+                        )}
+                        <div className="detail-item">
+                            <span className="detail-label">Fecha Inspección</span>
+                            <span className="detail-value">{record.fechaInspeccion}</span>
+                        </div>
+                        <div className="detail-item">
+                            <span className="detail-label">Tipo Servicio</span>
+                            <span className="detail-value">{record.tipo}</span>
+                        </div>
+                        <div className="detail-item">
+                            <span className="detail-label">Presupuesto Base</span>
+                            <span className="detail-value">${record.precioBase?.toLocaleString()}</span>
+                        </div>
+                    </div>
+
+                    {record.descripcion && (
+                        <>
+                            <h3 className="detail-section-title">Descripción del Trabajo</h3>
+                            <p style={{ lineHeight: '1.6', color: '#ccc' }}>{record.descripcion}</p>
+                        </>
+                    )}
+
+                    {record.notas && (
+                        <>
+                            <h3 className="detail-section-title">Notas de Presupuesto / Daños</h3>
+                            <div style={{ background: 'rgba(255, 193, 7, 0.05)', padding: '15px', borderRadius: '8px', borderLeft: '3px solid #FFC107' }}>
+                                <p style={{ whiteSpace: 'pre-wrap', margin: 0, color: '#ddd' }}>{record.notas}</p>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
 

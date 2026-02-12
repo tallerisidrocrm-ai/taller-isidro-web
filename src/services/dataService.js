@@ -24,13 +24,19 @@ export const dataService = {
                 id: row.id,
                 patente: row.Patente || 'N/A',
                 cliente: row["Nombre y  Apellido"] || 'S/D',
-                marca: '', // Marca doesn't seem to be a top-level field in the current sample
-                modelo: '',
+                marca: row.Marca || '',
+                modelo: row.Modelo || '',
                 seguro: (row.Aseguradora && row.Aseguradora.length > 0) ? row.Aseguradora[0] : 'Particular',
                 estado: row["Estado del Proceso"] || 'Pendiente',
                 precioBase: (row["Precio Base (from Ingreso a)"] && row["Precio Base (from Ingreso a)"].length > 0) ? row["Precio Base (from Ingreso a)"][0] : 0,
                 fechaInspeccion: row.createdTime ? row.createdTime.split('T')[0] : '',
-                tipo: (row["Servicio (from Ingreso a)"] && row["Servicio (from Ingreso a)"].length > 0) ? row["Servicio (from Ingreso a)"][0] : 'Varios'
+                tipo: (row["Servicio (from Ingreso a)"] && row["Servicio (from Ingreso a)"].length > 0) ? row["Servicio (from Ingreso a)"][0] : 'Varios',
+                // New fields for detailed view
+                telefono: row.Telefono || '',
+                notas: row["Notas Para presupuestar"] || '',
+                siniestro: row["Numero de Siniestro"] || '',
+                fotos: row["Imageesn del Vehiculo"] || [],
+                descripcion: (row["Description (from Ingreso a)"] && row["Description (from Ingreso a)"].length > 0) ? row["Description (from Ingreso a)"][0] : ''
             }));
 
             return normalizedData;

@@ -62,7 +62,7 @@ function AppContent() {
     <div className="app">
       <SEO />
       {!isStatsPage && <TopBar />}
-      <Header />
+      {!isStatsPage && <Header />}
       <main>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
@@ -71,7 +71,7 @@ function AppContent() {
           </Routes>
         </Suspense>
       </main>
-      <Footer />
+      {!isStatsPage && <Footer />}
       {!isStatsPage && <WhatsAppButton />}
     </div>
   );
