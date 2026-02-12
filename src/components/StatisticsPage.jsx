@@ -21,7 +21,7 @@ const MOCK_RECORDS = [
 ];
 
 export default function StatisticsPage() {
-    console.log("StatisticsPage v1.1.1 loaded - Kiosk Mode");
+    console.log("StatisticsPage v1.2.0 loaded - Kiosk Mode");
     const [data, setData] = useState([]);
     const [summaryPeriod, setSummaryPeriod] = useState('monthly'); // 'daily', 'monthly', 'annual'
     const [loading, setLoading] = useState(true);
@@ -179,6 +179,21 @@ export default function StatisticsPage() {
             ...insurersData
         ].filter(o => o.value > 0);
 
+        // Service Type breakdown
+        const serviceTypes = {};
+        targetData.forEach(r => {
+            let tipo = r.tipo || 'Varios';
+            if (!serviceTypes[tipo]) {
+                serviceTypes[tipo] = { count: 0, revenue: 0 };
+            }
+            serviceTypes[tipo].count++;
+            serviceTypes[tipo].revenue += (Number(r.precioBase) || 0);
+        });
+
+        const serviceTypesData = Object.entries(serviceTypes)
+            .map(([name, data]) => ({ name, value: data.count, revenue: data.revenue }))
+            .sort((a, b) => b.value - a.value);
+
         const dailyStats = {
             total: dailyData.length,
             inspecciones: dailySummary.insp,
@@ -200,7 +215,8 @@ export default function StatisticsPage() {
             insurersData,
             originsData,
             targetData,
-            daily: dailyStats
+            daily: dailyStats,
+            serviceTypesData
         };
     }, [data, filters.mes, filters.anio, summaryPeriod, selectedDate]);
 
@@ -238,7 +254,7 @@ export default function StatisticsPage() {
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <div className="pulse-dot"></div>
-                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>Airtable Live (v1.1.1)</span>
+                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>Airtable Live (v1.2.0)</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
                     <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
@@ -398,6 +414,30 @@ export default function StatisticsPage() {
                     </div>
                 </div>
 
+                {/* New Service Type Chart */}
+                <div className="stats-summary-section">
+                    <span className="section-label">Análisis por Tipo de Servicio</span>
+                    <div className="charts-grid">
+                        <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
+                            <h3>Ingresos y Cantidad por Servicio</h3>
+                            <div style={{ height: '300px' }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={stats.serviceTypesData}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                        <XAxis dataKey="name" stroke="#888" fontSize={12} />
+                                        <YAxis yAxisId="left" orientation="left" stroke="#2196F3" fontSize={12} />
+                                        <YAxis yAxisId="right" orientation="right" stroke="#4CAF50" fontSize={12} tickFormatter={(value) => `$${value / 1000}k`} />
+                                        <Tooltip contentStyle={{ backgroundColor: '#242424', border: '1px solid #333' }} formatter={(value, name) => [name === 'revenue' ? `$${value.toLocaleString()}` : value, name === 'revenue' ? 'Ingresos' : 'Cantidad']} />
+                                        <Legend />
+                                        <Bar yAxisId="left" dataKey="value" name="Cantidad" fill="#2196F3" radius={[4, 4, 0, 0]} barSize={30} />
+                                        <Bar yAxisId="right" dataKey="revenue" name="Ingresos" fill="#4CAF50" radius={[4, 4, 0, 0]} barSize={30} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Comparison & Details */}
                 <div className="stats-grid-complex">
                     <div className="complex-card">
@@ -414,6 +454,21 @@ export default function StatisticsPage() {
                             </div>
                         )) : (
                             <p style={{ padding: '20px', textAlign: 'center', color: 'var(--stat-text-muted)' }}>Sin datos de seguros en este periodo.</p>
+                        )}
+                    </div>
+
+                    <div className="complex-card">
+                        <h3>Detalle por Tipo de Servicio</h3>
+                        {stats.serviceTypesData.length > 0 ? stats.serviceTypesData.map((svc, i) => (
+                            <div key={i} className="stat-row">
+                                <span>{svc.name}</span>
+                                <div style={{ textAlign: 'right' }}>
+                                    <div style={{ fontWeight: 'bold', color: '#fff' }}>{svc.value}</div>
+                                    <div style={{ fontSize: '0.8rem', color: '#4CAF50' }}>${svc.revenue.toLocaleString()}</div>
+                                </div>
+                            </div>
+                        )) : (
+                            <p style={{ padding: '20px', textAlign: 'center', color: 'var(--stat-text-muted)' }}>Sin datos de servicios.</p>
                         )}
                     </div>
 
