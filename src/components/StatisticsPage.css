@@ -14,13 +14,15 @@
     animation: fadeIn 0.5s ease-out forwards;
 }
 
-root {
-    --stat-bg: #111111;
-    --stat-card: #1a1a1a;
+:root {
+    --stat-bg: #0a0a0c;
+    --stat-card: #161618;
     --stat-accent: #FFC107;
     --stat-success: #4CAF50;
-    --stat-text: #ffffff;
-    --stat-text-muted: #aaaaaa;
+    --stat-text: #FFC107;
+    /* Texto principal ahora en ámbar por defecto para elegancia */
+    --stat-text-muted: #b89a3e;
+    /* Ámbar apagado */
     --stat-border: #2a2a2a;
 }
 
@@ -45,12 +47,16 @@ root {
     font-weight: 800;
     color: var(--stat-accent);
     margin-bottom: 5px;
+    text-shadow: 0 0 20px rgba(255, 193, 7, 0.2);
 }
 
 .stats-subtitle {
-    color: var(--stat-text-muted);
-    font-size: 1rem;
-    margin-bottom: 12px;
+    color: var(--stat-accent);
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    opacity: 0.9;
 }
 
 .stats-summary-section {
@@ -58,59 +64,105 @@ root {
 }
 
 .section-label {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--stat-accent);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
     display: block;
-    border-left: 3px solid var(--stat-accent);
-    padding-left: 10px;
+    border-left: 4px solid var(--stat-accent);
+    padding-left: 12px;
 }
 
 /* KPI Cards */
 .kpi-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 15px;
+    margin-bottom: 25px;
 }
 
 .kpi-card {
     background: var(--stat-card);
-    padding: 20px;
-    border-radius: 12px;
+    padding: 24px 20px;
+    border-radius: 16px;
     border: 1px solid var(--stat-border);
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .kpi-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-5px);
     border-color: var(--stat-accent);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.15);
 }
 
 .kpi-value {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     font-weight: 900;
     color: var(--stat-accent);
     margin-bottom: 2px;
+    line-height: 1;
 }
 
 .kpi-label {
-    color: var(--stat-text-muted);
-    font-size: 0.85rem;
+    color: var(--stat-accent);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.85;
 }
 
-/* Table and General Cards */
+/* Summary Tabs Revert & Enhance */
+.summary-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 40px;
+    padding: 10px;
+}
+
+.tab-btn {
+    background: #1a1a1a;
+    border: 2px solid var(--stat-border);
+    color: var(--stat-text-muted);
+    padding: 14px 35px;
+    border-radius: 4px;
+    /* Squares as requested */
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.tab-btn:hover {
+    border-color: var(--stat-accent);
+    color: var(--stat-accent);
+    transform: translateY(-2px);
+}
+
+.tab-btn.active {
+    background: var(--stat-accent);
+    color: #000;
+    border-color: var(--stat-accent);
+    box-shadow: 0 0 25px rgba(255, 193, 7, 0.4);
+    transform: scale(1.05);
+}
+
+/* Base Card Styles */
 .chart-card,
 .complex-card,
 .filters-dashboard,
 .data-table-container {
     background: var(--stat-card);
-    border-radius: 16px;
+    border-radius: 20px;
     border: 1px solid var(--stat-border);
-    padding: 15px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .chart-card h3,
@@ -145,16 +197,17 @@ root {
 .filter-group label {
     font-size: 0.7rem;
     font-weight: 600;
-    color: var(--stat-text-muted);
+    color: var(--stat-accent);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    opacity: 0.9;
 }
 
 .filter-input,
 .filter-select-sm,
 .filter-input-large {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--stat-card-border);
+    border: 1px solid var(--stat-border);
     color: #fff;
     padding: 12px 16px;
     border-radius: 12px;
@@ -166,7 +219,7 @@ root {
 
 .filter-input:hover,
 .filter-select-sm:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 193, 7, 0.03);
     border-color: rgba(255, 193, 7, 0.4);
 }
 
@@ -180,36 +233,6 @@ root {
 /* Custom styling for date inputs */
 input[type="date"] {
     color-scheme: dark;
-}
-
-/* Summary Tabs Modernization */
-.summary-tabs {
-    display: flex;
-    justify-content: center;
-    padding: 6px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 14px;
-    width: fit-content;
-    margin: 0 auto 30px;
-    border: 1px solid var(--stat-border);
-}
-
-.tab-btn {
-    background: transparent;
-    border: none;
-    color: var(--stat-text-muted);
-    padding: 10px 24px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-.tab-btn.active {
-    background: var(--stat-accent);
-    color: #000;
-    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
 
 .filters-dashboard-mini {
@@ -380,8 +403,9 @@ input[type="date"] {
 }
 
 .stat-row strong {
-    color: #fff;
+    color: var(--stat-accent);
     font-size: 1rem;
+    opacity: 0.9;
 }
 
 .stat-row-mini {
@@ -439,13 +463,14 @@ input[type="date"] {
 }
 
 .stat-card-mini {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 193, 7, 0.03);
     padding: 12px 20px;
-    border-radius: 8px;
+    border-radius: 2px;
+    /* Square as requested */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 193, 7, 0.1);
 }
 
 .stat-card-mini span {
@@ -455,7 +480,7 @@ input[type="date"] {
 
 .stat-card-mini strong {
     font-size: 1.1rem;
-    color: #fff;
+    color: var(--stat-accent);
 }
 
 /* Data Section & Filters Bar */
@@ -826,11 +851,14 @@ input[type="date"] {
     background: #1a1a1a;
     border-radius: 20px;
     overflow: hidden;
-    border: 1px solid rgba(255, 193, 7, 0.3);
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7);
+    border: 2px solid var(--stat-accent);
+    /* Más notable */
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8);
     display: flex;
     flex-direction: column;
     position: relative;
+    background-image: radial-gradient(circle at 50% 50%, #222 0%, #1a1a1a 100%);
+    /* Sutil textura para que no sea negro plano */
 }
 
 /* Ensure the library container fills the window */

@@ -78,24 +78,33 @@ export default function StatisticsPage() {
                     mode: 'window',
                     container: chatContainerRef.current,
                     theme: {
-                        backgroundColor: '#1a1a1a',
-                        primaryColor: '#FFC107',
-                        fontColor: '#ffffff',
+                        backgroundColor: '#1a1a1a', // Fondo oscuro elegante
+                        primaryColor: '#FFC107',    // Acento Ámbar
+                        fontColor: '#ffffff',       // Blanco para mensajes
                         buttonColor: '#FFC107',
                         textColor: '#ffffff',
                         textInput: {
                             backgroundColor: '#2a2a2a',
                             textColor: '#ffffff',
-                            placeholderColor: '#aaaaaa',
+                            placeholderColor: '#888888',
+                        },
+                        // Colores específicos de burbujas para evitar que todo sea negro
+                        userMessage: {
+                            backgroundColor: '#FFC107',
+                            textColor: '#000000',
+                        },
+                        botMessage: {
+                            backgroundColor: '#333333',
+                            textColor: '#ffffff',
                         }
                     },
                     i18n: {
                         en: {
-                            title: 'Chat CRM',
+                            title: 'Asistente Taller Isidro',
                             welcome: '¡Hola! 👋',
                             callToAction: 'Inicia un chat. Estamos aquí para ayudarte 24/7.',
-                            placeholder: 'Escribe tu mensaje...',
-                            sendButtonTooltip: 'Enviar mensaje',
+                            placeholder: 'Escribe tu mensaje aquí...',
+                            sendButtonTooltip: 'Enviar',
                         }
                     }
                 });
