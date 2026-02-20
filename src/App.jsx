@@ -56,7 +56,7 @@ function HomePage() {
 
 function AppContent() {
   const location = useLocation();
-  const isStatsPage = location.pathname === '/estadisticas';
+  const isStatsPage = location.pathname.startsWith('/estadisticas');
 
   return (
     <div className="app">

@@ -554,6 +554,22 @@ export default function StatisticsPage() {
                     onClose={() => setSelectedRecord(null)}
                 />
             )}
+
+            {/* Botón flotante CRM */}
+            <a
+                href="https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="crm-floating-button"
+                title="Hablar con CRM"
+            >
+                <div className="crm-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M20,2H4C2.9,2,2,2.9,2,4v18l4-4h14c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2z M20,16H5.2L4,17.2V4h16V16z M7,9h10V7H7V9z M7,13h10v-2H7V13z" />
+                    </svg>
+                </div>
+                <span>CRM Chat</span>
+            </a>
         </div>
     );
 }

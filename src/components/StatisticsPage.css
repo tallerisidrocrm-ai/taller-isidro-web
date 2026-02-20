@@ -741,3 +741,53 @@ input[type="date"] {
 .data-table tbody tr:hover {
     background-color: rgba(255, 193, 7, 0.1) !important;
 }
+
+/* CRM Floating Button */
+.crm-floating-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #2196F3;
+    /* Modern Blue */
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.crm-floating-button:hover {
+    transform: scale(1.05) translateY(-5px);
+    background: #1976D2;
+    box-shadow: 0 8px 25px rgba(33, 150, 243, 0.6);
+    color: #fff;
+}
+
+.crm-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .crm-floating-button {
+        bottom: 20px;
+        right: 20px;
+        padding: 12px;
+        border-radius: 50%;
+        width: 56px;
+        height: 56px;
+        justify-content: center;
+    }
+
+    .crm-floating-button span {
+        display: none;
+    }
+}
