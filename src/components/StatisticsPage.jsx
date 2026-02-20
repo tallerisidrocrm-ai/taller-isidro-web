@@ -35,6 +35,7 @@ export default function StatisticsPage() {
     });
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedRecord, setSelectedRecord] = useState(null);
+    const [isChatOpen, setIsChatOpen] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
@@ -556,20 +557,39 @@ export default function StatisticsPage() {
             )}
 
             {/* Botón flotante CRM */}
-            <a
-                href="https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="crm-floating-button"
+            <button
+                onClick={() => setIsChatOpen(!isChatOpen)}
+                className={`crm-floating-button ${isChatOpen ? 'active' : ''}`}
                 title="Hablar con CRM"
             >
                 <div className="crm-icon">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                        <path d="M20,2H4C2.9,2,2,2.9,2,4v18l4-4h14c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2z M20,16H5.2L4,17.2V4h16V16z M7,9h10V7H7V9z M7,13h10v-2H7V13z" />
-                    </svg>
+                    {isChatOpen ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    ) : (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    )}
                 </div>
-                <span>CRM Chat</span>
-            </a>
+                <span>{isChatOpen ? 'Cerrar Chat' : 'Chat CRM'}</span>
+            </button>
+
+            {/* Ventana de Chat Empotrada */}
+            {isChatOpen && (
+                <div className="crm-chat-container">
+                    <div className="crm-chat-window">
+                        <iframe
+                            src="https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat"
+                            title="CRM Chat"
+                            className="crm-chat-iframe"
+                            allow="clipboard-read; clipboard-write"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
