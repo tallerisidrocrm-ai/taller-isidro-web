@@ -78,33 +78,24 @@ export default function StatisticsPage() {
                     mode: 'window',
                     container: chatContainerRef.current,
                     theme: {
-                        backgroundColor: '#1a1a1a', // Fondo oscuro elegante
-                        primaryColor: '#FFC107',    // Acento Ámbar
-                        fontColor: '#ffffff',       // Blanco para mensajes
-                        buttonColor: '#FFC107',
-                        textColor: '#ffffff',
+                        backgroundColor: '#ffffff', // Fondo claro original
+                        primaryColor: '#2196F3',    // Azul original
+                        fontColor: '#333333',       // Texto oscuro
+                        buttonColor: '#2196F3',
+                        textColor: '#333333',
                         textInput: {
-                            backgroundColor: '#2a2a2a',
-                            textColor: '#ffffff',
-                            placeholderColor: '#888888',
-                        },
-                        // Colores específicos de burbujas para evitar que todo sea negro
-                        userMessage: {
-                            backgroundColor: '#FFC107',
-                            textColor: '#000000',
-                        },
-                        botMessage: {
-                            backgroundColor: '#333333',
-                            textColor: '#ffffff',
+                            backgroundColor: '#f4f4f4',
+                            textColor: '#333333',
+                            placeholderColor: '#999999',
                         }
                     },
                     i18n: {
                         en: {
-                            title: 'Asistente Taller Isidro',
+                            title: 'Chat CRM',
                             welcome: '¡Hola! 👋',
                             callToAction: 'Inicia un chat. Estamos aquí para ayudarte 24/7.',
-                            placeholder: 'Escribe tu mensaje aquí...',
-                            sendButtonTooltip: 'Enviar',
+                            placeholder: 'Escribe tu mensaje...',
+                            sendButtonTooltip: 'Enviar mensaje',
                         }
                     }
                 });
@@ -398,9 +389,8 @@ export default function StatisticsPage() {
                     )}
                 </div>
 
-                {/* Summary Section */}
                 <div className="stats-summary-section">
-                    <span className="section-label">
+                    <span className={`section-label ${summaryPeriod === 'annual' ? 'alt' : ''}`}>
                         {summaryPeriod === 'daily' ? `Actividad ${new Date(selectedDate + 'T00:00:00').toLocaleDateString()}` :
                             summaryPeriod === 'monthly' ? `Resumen ${months[filters.mes]} ${filters.anio}` :
                                 `Acumulado Consolidado ${filters.anio}`}
@@ -455,7 +445,7 @@ export default function StatisticsPage() {
 
                 {/* Visual Charts */}
                 <div className="stats-summary-section">
-                    <span className="section-label">Distribución de Carga</span>
+                    <span className="section-label alt">Distribución de Carga</span>
                     <div className="charts-grid">
                         <div className="chart-card">
                             <h3>Unidades por Origen</h3>
@@ -499,7 +489,7 @@ export default function StatisticsPage() {
 
                 {/* New Service Type Chart */}
                 <div className="stats-summary-section">
-                    <span className="section-label">Análisis por Tipo de Servicio</span>
+                    <span className="section-label alt">Análisis por Tipo de Servicio</span>
                     <div className="charts-grid">
                         <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
                             <h3>Ingresos y Cantidad por Servicio</h3>

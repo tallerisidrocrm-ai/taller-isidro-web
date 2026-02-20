@@ -18,11 +18,13 @@
     --stat-bg: #0a0a0c;
     --stat-card: #161618;
     --stat-accent: #FFC107;
+    --stat-accent-alt: #00d2ff;
+    /* Nuevo color cian elegante */
     --stat-success: #4CAF50;
-    --stat-text: #FFC107;
-    /* Texto principal ahora en ámbar por defecto para elegancia */
-    --stat-text-muted: #b89a3e;
-    /* Ámbar apagado */
+    --stat-text: #e2e2e7;
+    /* Blanco refinado (no puro) */
+    --stat-text-muted: #8e8e93;
+    /* Gris suave */
     --stat-border: #2a2a2a;
 }
 
@@ -75,6 +77,11 @@
     padding-left: 12px;
 }
 
+.section-label.alt {
+    color: var(--stat-accent-alt);
+    border-left-color: var(--stat-accent-alt);
+}
+
 /* KPI Cards */
 .kpi-grid {
     display: grid;
@@ -107,12 +114,11 @@
 }
 
 .kpi-label {
-    color: var(--stat-accent);
+    color: var(--stat-text-muted);
     font-size: 0.9rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    opacity: 0.85;
 }
 
 /* Summary Tabs Revert & Enhance */
@@ -268,6 +274,7 @@ input[type="date"] {
     padding: 20px 24px;
     border-bottom: 1px solid var(--stat-border);
     font-size: 0.9rem;
+    color: var(--stat-text);
     transition: background 0.2s ease;
 }
 
@@ -403,9 +410,9 @@ input[type="date"] {
 }
 
 .stat-row strong {
-    color: var(--stat-accent);
-    font-size: 1rem;
-    opacity: 0.9;
+    color: var(--stat-text);
+    font-size: 1.1rem;
+    font-weight: 700;
 }
 
 .stat-row-mini {
@@ -480,7 +487,7 @@ input[type="date"] {
 
 .stat-card-mini strong {
     font-size: 1.1rem;
-    color: var(--stat-accent);
+    color: var(--stat-text);
 }
 
 /* Data Section & Filters Bar */
@@ -848,17 +855,14 @@ input[type="date"] {
 .crm-chat-window {
     width: 100%;
     height: 100%;
-    background: #1a1a1a;
+    background: #ffffff;
     border-radius: 20px;
     overflow: hidden;
-    border: 2px solid var(--stat-accent);
-    /* Más notable */
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8);
+    border: 2px solid #2196F3;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     position: relative;
-    background-image: radial-gradient(circle at 50% 50%, #222 0%, #1a1a1a 100%);
-    /* Sutil textura para que no sea negro plano */
 }
 
 /* Ensure the library container fills the window */
