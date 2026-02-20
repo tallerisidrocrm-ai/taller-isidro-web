@@ -78,24 +78,33 @@ export default function StatisticsPage() {
                     mode: 'window',
                     container: chatContainerRef.current,
                     theme: {
-                        backgroundColor: '#ffffff', // Fondo claro original
-                        primaryColor: '#2196F3',    // Azul original
-                        fontColor: '#333333',       // Texto oscuro
+                        backgroundColor: '#ffffff',
+                        primaryColor: '#2196F3',
+                        fontColor: '#1a1a1a',
                         buttonColor: '#2196F3',
                         textColor: '#333333',
                         textInput: {
-                            backgroundColor: '#f4f4f4',
-                            textColor: '#333333',
-                            placeholderColor: '#999999',
+                            backgroundColor: '#f5f5f7',
+                            textColor: '#1a1a1a',
+                            placeholderColor: '#8e8e93',
+                        },
+                        // Bubble adjustments to avoid 'too white' look
+                        userMessage: {
+                            backgroundColor: '#2196F3',
+                            textColor: '#ffffff',
+                        },
+                        botMessage: {
+                            backgroundColor: '#e9e9eb',
+                            textColor: '#1a1a1a',
                         }
                     },
                     i18n: {
                         en: {
-                            title: 'Chat CRM',
-                            welcome: '¡Hola! 👋',
-                            callToAction: 'Inicia un chat. Estamos aquí para ayudarte 24/7.',
-                            placeholder: 'Escribe tu mensaje...',
-                            sendButtonTooltip: 'Enviar mensaje',
+                            title: 'Chat Operativo',
+                            welcome: '¡Buen día! 👋',
+                            callToAction: '¿En qué podemos ayudarte hoy?',
+                            placeholder: 'Escribí tu consulta acá...',
+                            sendButtonTooltip: 'Enviar',
                         }
                     }
                 });
