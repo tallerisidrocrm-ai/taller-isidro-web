@@ -59,6 +59,56 @@ export default function StatisticsPage() {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const chatContainerRef = React.useRef(null);
+    const chatInitialized = React.useRef(false);
+
+    useEffect(() => {
+        // Cargar e inicializar el chat de n8n con textos traducidos
+        const initChat = async () => {
+            if (chatInitialized.current) return;
+
+            try {
+                // Importación dinámica desde CDN
+                const module = await import('https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js');
+                const { createChat } = module;
+
+                createChat({
+                    webhookUrl: 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7',
+                    showWelcomeButton: false,
+                    mode: 'window',
+                    container: chatContainerRef.current,
+                    theme: {
+                        backgroundColor: '#1a1a1a',
+                        primaryColor: '#FFC107',
+                        fontColor: '#ffffff',
+                        buttonColor: '#FFC107',
+                        textColor: '#ffffff',
+                        textInput: {
+                            backgroundColor: '#2a2a2a',
+                            textColor: '#ffffff',
+                            placeholderColor: '#aaaaaa',
+                        }
+                    },
+                    i18n: {
+                        en: {
+                            title: 'Chat CRM',
+                            welcome: '¡Hola! 👋',
+                            callToAction: 'Inicia un chat. Estamos aquí para ayudarte 24/7.',
+                            placeholder: 'Escribe tu mensaje...',
+                            sendButtonTooltip: 'Enviar mensaje',
+                        }
+                    }
+                });
+                chatInitialized.current = true;
+            } catch (error) {
+                console.error("Error al cargar el widget de chat:", error);
+            }
+        };
+
+        if (isChatOpen) {
+            initChat();
+        }
+    }, [isChatOpen]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -601,18 +651,18 @@ export default function StatisticsPage() {
             </button>
 
             {/* Ventana de Chat Empotrada */}
-            {isChatOpen && (
-                <div className="crm-chat-container">
-                    <div className="crm-chat-window">
-                        <iframe
-                            src="https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat"
-                            title="CRM Chat"
-                            className="crm-chat-iframe"
-                            allow="clipboard-read; clipboard-write"
-                        />
-                    </div>
+            <div
+                className="crm-chat-container"
+                style={{ display: isChatOpen ? 'flex' : 'none' }}
+            >
+                <div
+                    className="crm-chat-window"
+                    id="n8n-chat-container"
+                    ref={chatContainerRef}
+                >
+                    {/* El chat se inyectará aquí a través de la librería */}
                 </div>
-            )}
+            </div>
         </div>
     );
 }
