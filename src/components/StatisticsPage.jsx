@@ -20,6 +20,29 @@ const MOCK_RECORDS = [
     { id: 3, patente: 'AA 111 BB', cliente: 'Carlos Ruiz', marca: 'Honda', modelo: 'Civic', seguro: 'Particular', estado: 'Aprobado', precioBase: 120000, calificacionCliente: 5, fechaInspeccion: new Date().toISOString().split('T')[0], tipo: 'Reparación' },
 ];
 
+const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+        return (
+            <div style={{
+                backgroundColor: '#1a1a1a',
+                border: '1px solid #FFC107',
+                padding: '10px 15px',
+                borderRadius: '8px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
+            }}>
+                {label && <p style={{ margin: '0 0 5px 0', color: '#FFC107', fontWeight: 'bold', fontSize: '0.85rem' }}>{label}</p>}
+                {payload.map((item, index) => (
+                    <p key={index} style={{ margin: '0', color: '#fff', fontSize: '0.8rem' }}>
+                        <span style={{ color: item.fill || item.color, marginRight: '5px' }}>●</span>
+                        {item.name}: <strong>{item.value}</strong>
+                    </p>
+                ))}
+            </div>
+        );
+    }
+    return null;
+};
+
 export default function StatisticsPage() {
     console.log("StatisticsPage v1.2.0 loaded - Kiosk Mode");
     const [data, setData] = useState([]);
@@ -391,7 +414,7 @@ export default function StatisticsPage() {
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                             ))}
                                         </Pie>
-                                        <Tooltip contentStyle={{ backgroundColor: '#242424', border: '1px solid #333' }} />
+                                        <Tooltip content={<CustomTooltip />} />
                                         <Legend verticalAlign="bottom" height={36} />
                                     </PieChart>
                                 </ResponsiveContainer>
@@ -406,7 +429,7 @@ export default function StatisticsPage() {
                                         <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={true} vertical={false} />
                                         <XAxis type="number" stroke="#888" fontSize={12} />
                                         <YAxis dataKey="name" type="category" stroke="#888" fontSize={11} width={100} />
-                                        <Tooltip contentStyle={{ backgroundColor: '#242424', border: '1px solid #333' }} />
+                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
                                         <Bar dataKey="value" fill="#FFC107" radius={[0, 4, 4, 0]} barSize={20} />
                                     </BarChart>
                                 </ResponsiveContainer>
@@ -427,7 +450,7 @@ export default function StatisticsPage() {
                                         <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                                         <XAxis dataKey="name" stroke="#888" fontSize={12} />
                                         <YAxis orientation="left" stroke="#2196F3" fontSize={12} />
-                                        <Tooltip contentStyle={{ backgroundColor: '#242424', border: '1px solid #333' }} />
+                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
                                         <Legend />
                                         <Bar dataKey="value" name="Cantidad" fill="#2196F3" radius={[4, 4, 0, 0]} barSize={30} />
                                     </BarChart>
