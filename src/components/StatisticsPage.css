@@ -1,3 +1,5 @@
+@import url('https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css');
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -857,6 +859,7 @@ input[type="date"] {
     height: 100%;
     background: #f9f9f9;
     /* Off-white for better internal contrast */
+    color: #1a1a1a;
     border-radius: 20px;
     overflow: hidden;
     border: 1px solid rgba(33, 150, 243, 0.3);
@@ -864,6 +867,7 @@ input[type="date"] {
     display: flex;
     flex-direction: column;
     position: relative;
+    text-align: left;
 }
 
 /* Ensure the library container fills the window */

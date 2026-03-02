@@ -73,29 +73,15 @@ export default function StatisticsPage() {
                 const { createChat } = module;
 
                 createChat({
-                    webhookUrl: 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7',
+                    webhookUrl: 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat',
                     showWelcomeButton: false,
-                    mode: 'window',
-                    container: chatContainerRef.current,
+                    mode: 'fullscreen',
+                    target: chatContainerRef.current,
                     theme: {
-                        backgroundColor: '#ffffff',
-                        primaryColor: '#2196F3',
-                        fontColor: '#1a1a1a',
-                        buttonColor: '#2196F3',
-                        textColor: '#333333',
-                        textInput: {
-                            backgroundColor: '#f5f5f7',
-                            textColor: '#1a1a1a',
-                            placeholderColor: '#8e8e93',
-                        },
-                        // Bubble adjustments to avoid 'too white' look
-                        userMessage: {
-                            backgroundColor: '#2196F3',
-                            textColor: '#ffffff',
-                        },
-                        botMessage: {
-                            backgroundColor: '#e9e9eb',
-                            textColor: '#1a1a1a',
+                        color: {
+                            primary: '#2196F3',
+                            background: '#ffffff',
+                            font: '#1a1a1a'
                         }
                     },
                     i18n: {
