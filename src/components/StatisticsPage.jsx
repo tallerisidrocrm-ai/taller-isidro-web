@@ -623,7 +623,7 @@ export default function StatisticsPage() {
                             }}>&times;</button>
                         </div>
                         <iframe
-                            src={`https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat?t=${new Date().getTime()}`}
+                            src="https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat"
                             style={{
                                 width: '100%',
                                 height: 'calc(100% - 40px)',
