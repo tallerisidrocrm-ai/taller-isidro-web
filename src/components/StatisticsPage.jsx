@@ -3,7 +3,7 @@ import { dataService } from '../services/dataService';
 import SEO from './SEO';
 import {
     PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
-    BarChart, Bar, XAxis, YAxis, CartesianGrid
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area
 } from 'recharts';
 import './StatisticsPage.css';
 
@@ -44,7 +44,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function StatisticsPage() {
-    console.log("StatisticsPage v1.3.0 loaded - Interactive Dashboard");
+    console.log("StatisticsPage v1.4.0 loaded - Evolution Analytics");
     const [data, setData] = useState([]);
     const [summaryPeriod, setSummaryPeriod] = useState('monthly'); // 'daily', 'monthly', 'annual'
     const [loading, setLoading] = useState(true);
@@ -229,6 +229,20 @@ export default function StatisticsPage() {
             finalizado: dailySummary.finalizado
         };
 
+        // Evolution data: Monthly breakdown for the current year
+        const evolutionData = months.map((month, index) => {
+            const monthRecords = data.filter(r => {
+                const d = new Date(r.fechaInspeccion);
+                return d.getMonth() === index && d.getFullYear().toString() === currentYear;
+            });
+            return {
+                name: month.substring(0, 3),
+                fullName: month,
+                cantidad: monthRecords.length,
+                ingresos: monthRecords.reduce((sum, r) => sum + (Number(r.precioBase) || 0), 0)
+            };
+        });
+
         console.log("Categories:", categories);
         console.log("Daily Stats:", dailyStats);
         console.groupEnd();
@@ -240,7 +254,8 @@ export default function StatisticsPage() {
             originsData,
             targetData,
             daily: dailyStats,
-            serviceTypesData
+            serviceTypesData,
+            evolutionData
         };
     }, [data, filters.mes, filters.anio, summaryPeriod, selectedDate]);
 
@@ -300,7 +315,7 @@ export default function StatisticsPage() {
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <div className="pulse-dot"></div>
-                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.3.0)</span>
+                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.4.0)</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
                     <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
@@ -334,6 +349,10 @@ export default function StatisticsPage() {
                         className={`tab-btn ${summaryPeriod === 'annual' ? 'active' : ''}`}
                         onClick={() => setSummaryPeriod('annual')}
                     >Acumulado Anual</button>
+                    <button
+                        className={`tab-btn ${summaryPeriod === 'evolution' ? 'active' : ''}`}
+                        onClick={() => setSummaryPeriod('evolution')}
+                    >Evolución</button>
                 </div>
 
                 {/* Period Selection Filters (Secondary) */}
@@ -346,6 +365,14 @@ export default function StatisticsPage() {
                                 value={selectedDate}
                                 onChange={(e) => setSelectedDate(e.target.value)}
                             />
+                        </div>
+                    ) : summaryPeriod === 'evolution' || summaryPeriod === 'annual' ? (
+                        <div className="filter-group-row">
+                            <select name="anio" className="filter-select-sm" value={filters.anio} onChange={handleFilterChange}>
+                                <option value="2024">2024</option>
+                                <option value="2025">2025</option>
+                                <option value="2026">2026</option>
+                            </select>
                         </div>
                     ) : (
                         <div className="filter-group-row">
@@ -455,7 +482,7 @@ export default function StatisticsPage() {
                         </div>
 
                         <div className="chart-card">
-                            <h3>Ranking Aseguradoras ({isAnnual ? 'Anual' : 'Mensual'})</h3>
+                            <h3>Ranking Aseguradoras ({isAnnual || summaryPeriod === 'evolution' ? 'Anual' : 'Mensual'})</h3>
                             <div style={{ height: '300px' }}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={stats.insurersData} layout="vertical">
@@ -492,6 +519,65 @@ export default function StatisticsPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Evolution Specific View */}
+                {summaryPeriod === 'evolution' && (
+                    <div className="stats-summary-section animate-slide-up">
+                        <span className="section-label alt">Evolución Mensual {filters.anio}</span>
+                        <div className="chart-card" style={{ marginTop: '20px', padding: '20px' }}>
+                            <h3>Tendencia de Unidades e Ingresos</h3>
+                            <div style={{ height: '400px', marginTop: '20px' }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={stats.evolutionData}>
+                                        <defs>
+                                            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#FFC107" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#FFC107" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                        <XAxis dataKey="name" stroke="#888" fontSize={12} />
+                                        <YAxis stroke="#888" fontSize={12} />
+                                        <Tooltip content={<CustomTooltip />} />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="cantidad"
+                                            name="Cantidad"
+                                            stroke="#FFC107"
+                                            strokeWidth={3}
+                                            fillOpacity={1}
+                                            fill="url(#colorValue)"
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        <div className="complex-card" style={{ marginTop: '30px' }}>
+                            <h3>Resumen por Mes ({filters.anio})</h3>
+                            <div className="data-table-container">
+                                <table className="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Mes</th>
+                                            <th style={{ textAlign: 'center' }}>Unidades</th>
+                                            <th style={{ textAlign: 'right' }}>Ingresos Est.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {stats.evolutionData.map((m, i) => (
+                                            <tr key={i}>
+                                                <td><strong>{m.fullName}</strong></td>
+                                                <td style={{ textAlign: 'center' }}>{m.cantidad}</td>
+                                                <td style={{ textAlign: 'right', color: '#4CAF50' }}>${m.ingresos.toLocaleString()}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Comparison & Details */}
                 <div className="stats-grid-complex">
