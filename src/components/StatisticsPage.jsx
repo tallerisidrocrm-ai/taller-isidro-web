@@ -59,51 +59,6 @@ export default function StatisticsPage() {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [isChatOpen, setIsChatOpen] = useState(false);
-    const chatContainerRef = React.useRef(null);
-    const chatInitialized = React.useRef(false);
-
-    useEffect(() => {
-        // Cargar e inicializar el chat de n8n con textos traducidos
-        const initChat = async () => {
-            if (chatInitialized.current) return;
-
-            try {
-                // Importación dinámica desde CDN
-                const module = await import('https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js');
-                const { createChat } = module;
-
-                createChat({
-                    webhookUrl: 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat',
-                    showWelcomeButton: false,
-                    mode: 'fullscreen',
-                    target: chatContainerRef.current,
-                    theme: {
-                        color: {
-                            primary: '#2196F3',
-                            background: '#ffffff',
-                            font: '#1a1a1a'
-                        }
-                    },
-                    i18n: {
-                        en: {
-                            title: 'Chat Operativo',
-                            welcome: '¡Buen día! 👋',
-                            callToAction: '¿En qué podemos ayudarte hoy?',
-                            placeholder: 'Escribí tu consulta acá...',
-                            sendButtonTooltip: 'Enviar',
-                        }
-                    }
-                });
-                chatInitialized.current = true;
-            } catch (error) {
-                console.error("Error al cargar el widget de chat:", error);
-            }
-        };
-
-        if (isChatOpen) {
-            initChat();
-        }
-    }, [isChatOpen]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -644,19 +599,24 @@ export default function StatisticsPage() {
                 <span>{isChatOpen ? 'Cerrar Chat' : 'Chat CRM'}</span>
             </button>
 
-            {/* Ventana de Chat Empotrada */}
-            <div
-                className="crm-chat-container"
-                style={{ display: isChatOpen ? 'flex' : 'none' }}
-            >
-                <div
-                    className="crm-chat-window"
-                    id="n8n-chat-container"
-                    ref={chatContainerRef}
-                >
-                    {/* El chat se inyectará aquí a través de la librería */}
+            {/* Ventana de Chat CRM via iframe */}
+            {isChatOpen && (
+                <div className="crm-chat-container">
+                    <div className="crm-chat-window">
+                        <iframe
+                            src="https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat"
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                border: 'none',
+                                borderRadius: '20px',
+                            }}
+                            title="Chat CRM Taller Isidro"
+                            allow="microphone"
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
