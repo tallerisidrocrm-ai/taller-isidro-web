@@ -44,7 +44,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function StatisticsPage() {
-    console.log("StatisticsPage v1.2.1 loaded - Kiosk Mode");
+    console.log("StatisticsPage v1.3.0 loaded - Interactive Dashboard");
     const [data, setData] = useState([]);
     const [summaryPeriod, setSummaryPeriod] = useState('monthly'); // 'daily', 'monthly', 'annual'
     const [loading, setLoading] = useState(true);
@@ -246,7 +246,29 @@ export default function StatisticsPage() {
 
     const filteredTableData = useMemo(() => {
         let result = stats.targetData;
-        if (filters.estado) result = result.filter(r => r.estado === filters.estado);
+
+        if (filters.estado) {
+            const filterEstado = filters.estado;
+            result = result.filter(r => {
+                const itemEstado = (r.estado || '').trim();
+                const itemEstadoLower = itemEstado.toLowerCase();
+
+                // Aggregate logic for KPI-based filters
+                if (filterEstado === 'En Reparación') {
+                    return itemEstado === 'En Reparacion' || itemEstado === 'En Reparación' || itemEstado === 'En Proceso' || itemEstado === 'Aprobado' || itemEstadoLower.includes('reparaci');
+                } else if (filterEstado === 'Presupuesto' || filterEstado === 'Presupuestos') {
+                    return itemEstado === 'Presupuesto' || itemEstadoLower.includes('presupuesto');
+                } else if (filterEstado === 'Inspección' || filterEstado === 'Inspecciones') {
+                    return itemEstado === 'Inspecion' || itemEstado === 'Inspección' || itemEstadoLower.includes('inspeccion') || itemEstadoLower.includes('inspec');
+                } else if (filterEstado === 'Finalizado') {
+                    return itemEstadoLower === 'finalizado' || itemEstadoLower.includes('entregado');
+                }
+
+                // Direct match for other dropdown values
+                return itemEstado === filterEstado;
+            });
+        }
+
         if (filters.seguro) result = result.filter(r => r.seguro === filters.seguro);
         if (filters.marca) result = result.filter(r =>
             (r.marca && r.marca.toLowerCase().includes(filters.marca.toLowerCase())) ||
@@ -278,7 +300,7 @@ export default function StatisticsPage() {
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <div className="pulse-dot"></div>
-                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.2.1)</span>
+                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.3.0)</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
                     <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
@@ -346,19 +368,31 @@ export default function StatisticsPage() {
                                 `Acumulado Consolidado ${filters.anio}`}
                     </span>
                     <div className="kpi-grid">
-                        <div className="kpi-card">
+                        <div
+                            className={`kpi-card clickable ${!filters.estado ? 'active' : ''}`}
+                            onClick={() => setFilters(prev => ({ ...prev, estado: '' }))}
+                        >
                             <div className="kpi-value">{stats.total}</div>
                             <div className="kpi-label">Unidades Totales</div>
                         </div>
-                        <div className="kpi-card">
+                        <div
+                            className={`kpi-card clickable ${filters.estado === 'En Reparación' ? 'active' : ''}`}
+                            onClick={() => setFilters(prev => ({ ...prev, estado: 'En Reparación' }))}
+                        >
                             <div className="kpi-value">{stats.categories['En Reparación'].count}</div>
                             <div className="kpi-label">En Reparación</div>
                         </div>
-                        <div className="kpi-card">
+                        <div
+                            className={`kpi-card clickable ${filters.estado === 'Presupuesto' ? 'active' : ''}`}
+                            onClick={() => setFilters(prev => ({ ...prev, estado: 'Presupuesto' }))}
+                        >
                             <div className="kpi-value">{stats.categories['Presupuesto'].count}</div>
                             <div className="kpi-label">Presupuestos</div>
                         </div>
-                        <div className="kpi-card">
+                        <div
+                            className={`kpi-card clickable ${filters.estado === 'Inspección' ? 'active' : ''}`}
+                            onClick={() => setFilters(prev => ({ ...prev, estado: 'Inspección' }))}
+                        >
                             <div className="kpi-value">{stats.categories['Inspección'].count}</div>
                             <div className="kpi-label">Inspecciones</div>
                         </div>
@@ -512,11 +546,14 @@ export default function StatisticsPage() {
                             <label>Estado</label>
                             <select name="estado" className="filter-input" value={filters.estado} onChange={handleFilterChange}>
                                 <option value="">Todos los Estados</option>
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="Aprobado">Aprobado</option>
-                                <option value="En Proceso">En Proceso</option>
+                                <option value="En Reparación">En Reparación (Todos)</option>
+                                <option value="Presupuesto">Presupuestos (Todos)</option>
+                                <option value="Inspección">Inspecciones (Todas)</option>
                                 <option value="Finalizado">Finalizado</option>
-                                <option value="Rechazado">Rechazado</option>
+                                <option value="Pendiente">Pendiente (Airtable)</option>
+                                <option value="Aprobado">Aprobado (Airtable)</option>
+                                <option value="En Proceso">En Proceso (Airtable)</option>
+                                <option value="Rechazado">Rechazado (Airtable)</option>
                             </select>
                         </div>
                         <div className="filter-group">
