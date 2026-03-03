@@ -249,6 +249,7 @@ export default function StatisticsPage() {
             return {
                 name: month.substring(0, 3),
                 fullName: month,
+                reparacionCantidad: reparaciones.length,
                 reparacionIngresos: reparaciones.reduce((sum, r) => sum + (Number(r.precioBase) || 0), 0),
                 inspeccionCantidad: inspecciones.length,
                 totalUnidades: monthRecords.length
@@ -327,7 +328,7 @@ export default function StatisticsPage() {
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <div className="pulse-dot"></div>
-                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.5.0)</span>
+                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.5.1)</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
                     <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
@@ -541,7 +542,7 @@ export default function StatisticsPage() {
                     <div className="stats-summary-section animate-slide-up">
                         <span className="section-label alt">Evolución Anual {filters.anio}</span>
                         <div className="chart-card" style={{ marginTop: '20px', padding: '20px' }}>
-                            <h3>Tendencia: Reparaciones e Inspecciones</h3>
+                            <h3>Relación: Inspecciones vs Reparaciones (Cantidades)</h3>
                             <div style={{ height: '450px', marginTop: '20px' }}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={stats.evolutionData}>
@@ -562,21 +563,21 @@ export default function StatisticsPage() {
                                         <Legend verticalAlign="top" height={36} />
                                         <Area
                                             type="monotone"
-                                            dataKey="reparacionIngresos"
-                                            name="Ingresos Rep."
-                                            stroke="#2196F3"
-                                            strokeWidth={3}
-                                            fillOpacity={1}
-                                            fill="url(#colorRep)"
-                                        />
-                                        <Area
-                                            type="monotone"
                                             dataKey="inspeccionCantidad"
-                                            name="Cant. Inspecciones"
+                                            name="Inspecciones"
                                             stroke="#FFC107"
                                             strokeWidth={3}
                                             fillOpacity={1}
                                             fill="url(#colorInsp)"
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="reparacionCantidad"
+                                            name="Reparaciones"
+                                            stroke="#2196F3"
+                                            strokeWidth={3}
+                                            fillOpacity={1}
+                                            fill="url(#colorRep)"
                                         />
                                     </AreaChart>
                                 </ResponsiveContainer>
@@ -591,7 +592,8 @@ export default function StatisticsPage() {
                                         <tr>
                                             <th>Mes</th>
                                             <th style={{ textAlign: 'center' }}>Inspecciones</th>
-                                            <th style={{ textAlign: 'right' }}>Ingresos Reparación</th>
+                                            <th style={{ textAlign: 'center' }}>Reparaciones</th>
+                                            <th style={{ textAlign: 'right' }}>Ingresos Est.</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -599,7 +601,8 @@ export default function StatisticsPage() {
                                             <tr key={i}>
                                                 <td><strong>{m.fullName}</strong></td>
                                                 <td style={{ textAlign: 'center', color: '#FFC107' }}>{m.inspeccionCantidad}</td>
-                                                <td style={{ textAlign: 'right', color: '#2196F3' }}>${m.reparacionIngresos.toLocaleString()}</td>
+                                                <td style={{ textAlign: 'center', color: '#2196F3' }}>{m.reparacionCantidad}</td>
+                                                <td style={{ textAlign: 'right', color: '#4CAF50' }}>${m.reparacionIngresos.toLocaleString()}</td>
                                             </tr>
                                         ))}
                                     </tbody>
