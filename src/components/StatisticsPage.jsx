@@ -601,18 +601,36 @@ export default function StatisticsPage() {
 
             {/* Ventana de Chat CRM via iframe */}
             {isChatOpen && (
-                <div className="crm-chat-container">
-                    <div className="crm-chat-window">
+                <div className="crm-chat-container" style={{ zIndex: 9999 }}>
+                    <div className="crm-chat-window" style={{ background: '#fff' }}>
+                        <div className="chat-header-bar" style={{
+                            padding: '10px 15px',
+                            background: '#2196F3',
+                            color: '#fff',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            borderTopLeftRadius: '20px',
+                            borderTopRightRadius: '20px'
+                        }}>
+                            <span style={{ fontWeight: 'bold' }}>Asistente CRM Isidro</span>
+                            <button onClick={() => setIsChatOpen(false)} style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#fff',
+                                cursor: 'pointer',
+                                fontSize: '1.2rem'
+                            }}>&times;</button>
+                        </div>
                         <iframe
-                            src="https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat"
+                            src={`https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat?t=${new Date().getTime()}`}
                             style={{
                                 width: '100%',
-                                height: '100%',
+                                height: 'calc(100% - 40px)',
                                 border: 'none',
-                                borderRadius: '20px',
                             }}
                             title="Chat CRM Taller Isidro"
-                            allow="microphone"
+                            allow="microphone; camera"
                         />
                     </div>
                 </div>
