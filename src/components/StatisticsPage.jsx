@@ -44,7 +44,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function StatisticsPage() {
-    console.log("StatisticsPage v1.4.1 loaded - Refined Evolution View");
+    console.log("StatisticsPage v1.5.0 loaded - Dual Track Evolution");
     const [data, setData] = useState([]);
     const [summaryPeriod, setSummaryPeriod] = useState('monthly'); // 'daily', 'monthly', 'annual'
     const [loading, setLoading] = useState(true);
@@ -101,7 +101,7 @@ export default function StatisticsPage() {
                     return d.getMonth().toString() === currentMonth && d.getFullYear().toString() === currentYear;
                 });
             }
-            if (period === 'annual') {
+            if (period === 'annual' || period === 'evolution') {
                 return data.filter(r => new Date(r.fechaInspeccion).getFullYear().toString() === currentYear);
             }
             return data;
@@ -235,11 +235,23 @@ export default function StatisticsPage() {
                 const d = new Date(r.fechaInspeccion);
                 return d.getMonth() === index && d.getFullYear().toString() === currentYear;
             });
+
+            const reparaciones = monthRecords.filter(r => {
+                const est = (r.estado || '').trim().toLowerCase();
+                return est === 'en reparacion' || est === 'en reparación' || est === 'en proceso' || est === 'aprobado' || est.includes('reparaci');
+            });
+
+            const inspecciones = monthRecords.filter(r => {
+                const est = (r.estado || '').trim().toLowerCase();
+                return est === 'inspecion' || est === 'inspección' || est.includes('inspeccion') || est.includes('inspec');
+            });
+
             return {
                 name: month.substring(0, 3),
                 fullName: month,
-                cantidad: monthRecords.length,
-                ingresos: monthRecords.reduce((sum, r) => sum + (Number(r.precioBase) || 0), 0)
+                reparacionIngresos: reparaciones.reduce((sum, r) => sum + (Number(r.precioBase) || 0), 0),
+                inspeccionCantidad: inspecciones.length,
+                totalUnidades: monthRecords.length
             };
         });
 
@@ -315,7 +327,7 @@ export default function StatisticsPage() {
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <div className="pulse-dot"></div>
-                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.4.1)</span>
+                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.5.0)</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
                     <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
@@ -527,14 +539,18 @@ export default function StatisticsPage() {
                 {/* Evolution Specific View */}
                 {summaryPeriod === 'evolution' && (
                     <div className="stats-summary-section animate-slide-up">
-                        <span className="section-label alt">Evolución Mensual {filters.anio}</span>
+                        <span className="section-label alt">Evolución Anual {filters.anio}</span>
                         <div className="chart-card" style={{ marginTop: '20px', padding: '20px' }}>
-                            <h3>Tendencia de Unidades e Ingresos</h3>
-                            <div style={{ height: '400px', marginTop: '20px' }}>
+                            <h3>Tendencia: Reparaciones e Inspecciones</h3>
+                            <div style={{ height: '450px', marginTop: '20px' }}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={stats.evolutionData}>
                                         <defs>
-                                            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                            <linearGradient id="colorRep" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#2196F3" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#2196F3" stopOpacity={0} />
+                                            </linearGradient>
+                                            <linearGradient id="colorInsp" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#FFC107" stopOpacity={0.3} />
                                                 <stop offset="95%" stopColor="#FFC107" stopOpacity={0} />
                                             </linearGradient>
@@ -543,14 +559,24 @@ export default function StatisticsPage() {
                                         <XAxis dataKey="name" stroke="#888" fontSize={12} />
                                         <YAxis stroke="#888" fontSize={12} />
                                         <Tooltip content={<CustomTooltip />} />
+                                        <Legend verticalAlign="top" height={36} />
                                         <Area
                                             type="monotone"
-                                            dataKey="cantidad"
-                                            name="Cantidad"
+                                            dataKey="reparacionIngresos"
+                                            name="Ingresos Rep."
+                                            stroke="#2196F3"
+                                            strokeWidth={3}
+                                            fillOpacity={1}
+                                            fill="url(#colorRep)"
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="inspeccionCantidad"
+                                            name="Cant. Inspecciones"
                                             stroke="#FFC107"
                                             strokeWidth={3}
                                             fillOpacity={1}
-                                            fill="url(#colorValue)"
+                                            fill="url(#colorInsp)"
                                         />
                                     </AreaChart>
                                 </ResponsiveContainer>
@@ -558,22 +584,22 @@ export default function StatisticsPage() {
                         </div>
 
                         <div className="complex-card" style={{ marginTop: '30px' }}>
-                            <h3>Resumen por Mes ({filters.anio})</h3>
+                            <h3>Resumen Evolución ({filters.anio})</h3>
                             <div className="data-table-container">
                                 <table className="data-table">
                                     <thead>
                                         <tr>
                                             <th>Mes</th>
-                                            <th style={{ textAlign: 'center' }}>Unidades</th>
-                                            <th style={{ textAlign: 'right' }}>Ingresos Est.</th>
+                                            <th style={{ textAlign: 'center' }}>Inspecciones</th>
+                                            <th style={{ textAlign: 'right' }}>Ingresos Reparación</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {stats.evolutionData.map((m, i) => (
                                             <tr key={i}>
                                                 <td><strong>{m.fullName}</strong></td>
-                                                <td style={{ textAlign: 'center' }}>{m.cantidad}</td>
-                                                <td style={{ textAlign: 'right', color: '#4CAF50' }}>${m.ingresos.toLocaleString()}</td>
+                                                <td style={{ textAlign: 'center', color: '#FFC107' }}>{m.inspeccionCantidad}</td>
+                                                <td style={{ textAlign: 'right', color: '#2196F3' }}>${m.reparacionIngresos.toLocaleString()}</td>
                                             </tr>
                                         ))}
                                     </tbody>
