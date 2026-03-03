@@ -44,7 +44,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function StatisticsPage() {
-    console.log("StatisticsPage v1.4.0 loaded - Evolution Analytics");
+    console.log("StatisticsPage v1.4.1 loaded - Refined Evolution View");
     const [data, setData] = useState([]);
     const [summaryPeriod, setSummaryPeriod] = useState('monthly'); // 'daily', 'monthly', 'annual'
     const [loading, setLoading] = useState(true);
@@ -315,7 +315,7 @@ export default function StatisticsPage() {
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <div className="pulse-dot"></div>
-                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.4.0)</span>
+                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.4.1)</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
                     <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
@@ -455,70 +455,74 @@ export default function StatisticsPage() {
                 )}
 
                 {/* Visual Charts */}
-                <div className="stats-summary-section">
-                    <span className="section-label alt">Distribución de Carga</span>
-                    <div className="charts-grid">
-                        <div className="chart-card">
-                            <h3>Unidades por Origen</h3>
-                            <div style={{ height: '300px' }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={stats.originsData}
-                                            innerRadius={60}
-                                            outerRadius={80}
-                                            paddingAngle={5}
-                                            dataKey="value"
-                                        >
-                                            {stats.originsData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip content={<CustomTooltip />} />
-                                        <Legend verticalAlign="bottom" height={36} />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                {summaryPeriod !== 'evolution' && (
+                    <div className="stats-summary-section">
+                        <span className="section-label alt">Distribución de Carga</span>
+                        <div className="charts-grid">
+                            <div className="chart-card">
+                                <h3>Unidades por Origen</h3>
+                                <div style={{ height: '300px' }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={stats.originsData}
+                                                innerRadius={60}
+                                                outerRadius={80}
+                                                paddingAngle={5}
+                                                dataKey="value"
+                                            >
+                                                {stats.originsData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip content={<CustomTooltip />} />
+                                            <Legend verticalAlign="bottom" height={36} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="chart-card">
-                            <h3>Ranking Aseguradoras ({isAnnual || summaryPeriod === 'evolution' ? 'Anual' : 'Mensual'})</h3>
-                            <div style={{ height: '300px' }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={stats.insurersData} layout="vertical">
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={true} vertical={false} />
-                                        <XAxis type="number" stroke="#888" fontSize={12} />
-                                        <YAxis dataKey="name" type="category" stroke="#888" fontSize={11} width={100} />
-                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
-                                        <Bar dataKey="value" fill="#FFC107" radius={[0, 4, 4, 0]} barSize={20} />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                            <div className="chart-card">
+                                <h3>Ranking Aseguradoras ({isAnnual || summaryPeriod === 'evolution' ? 'Anual' : 'Mensual'})</h3>
+                                <div style={{ height: '300px' }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={stats.insurersData} layout="vertical">
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={true} vertical={false} />
+                                            <XAxis type="number" stroke="#888" fontSize={12} />
+                                            <YAxis dataKey="name" type="category" stroke="#888" fontSize={11} width={100} />
+                                            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
+                                            <Bar dataKey="value" fill="#FFC107" radius={[0, 4, 4, 0]} barSize={20} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* New Service Type Chart */}
-                <div className="stats-summary-section">
-                    <span className="section-label alt">Análisis por Tipo de Servicio</span>
-                    <div className="charts-grid">
-                        <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-                            <h3>Ingresos y Cantidad por Servicio</h3>
-                            <div style={{ height: '300px' }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={stats.serviceTypesData}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                                        <XAxis dataKey="name" stroke="#888" fontSize={12} />
-                                        <YAxis orientation="left" stroke="#2196F3" fontSize={12} />
-                                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
-                                        <Legend />
-                                        <Bar dataKey="value" name="Cantidad" fill="#2196F3" radius={[4, 4, 0, 0]} barSize={30} />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                {summaryPeriod !== 'evolution' && (
+                    <div className="stats-summary-section">
+                        <span className="section-label alt">Análisis por Tipo de Servicio</span>
+                        <div className="charts-grid">
+                            <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
+                                <h3>Ingresos y Cantidad por Servicio</h3>
+                                <div style={{ height: '300px' }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={stats.serviceTypesData}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                            <XAxis dataKey="name" stroke="#888" fontSize={12} />
+                                            <YAxis orientation="left" stroke="#2196F3" fontSize={12} />
+                                            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
+                                            <Legend />
+                                            <Bar dataKey="value" name="Cantidad" fill="#2196F3" radius={[4, 4, 0, 0]} barSize={30} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* Evolution Specific View */}
                 {summaryPeriod === 'evolution' && (
@@ -580,50 +584,52 @@ export default function StatisticsPage() {
                 )}
 
                 {/* Comparison & Details */}
-                <div className="stats-grid-complex">
-                    <div className="complex-card">
-                        <h3>Detalle por Aseguradora</h3>
-                        {stats.insurersData.length > 0 ? stats.insurersData.map((ins, i) => (
-                            <div key={i} className="stat-row">
-                                <span>{ins.name}</span>
-                                <div>
-                                    <strong>{ins.value}</strong>
-                                    <small style={{ marginLeft: '5px', color: 'var(--stat-text-muted)' }}>
-                                        ({((ins.value / stats.total) * 100).toFixed(1)}%)
-                                    </small>
+                {summaryPeriod !== 'evolution' && (
+                    <div className="stats-grid-complex">
+                        <div className="complex-card">
+                            <h3>Detalle por Aseguradora</h3>
+                            {stats.insurersData.length > 0 ? stats.insurersData.map((ins, i) => (
+                                <div key={i} className="stat-row">
+                                    <span>{ins.name}</span>
+                                    <div>
+                                        <strong>{ins.value}</strong>
+                                        <small style={{ marginLeft: '5px', color: 'var(--stat-text-muted)' }}>
+                                            ({((ins.value / stats.total) * 100).toFixed(1)}%)
+                                        </small>
+                                    </div>
                                 </div>
-                            </div>
-                        )) : (
-                            <p style={{ padding: '20px', textAlign: 'center', color: 'var(--stat-text-muted)' }}>Sin datos de seguros en este periodo.</p>
-                        )}
-                    </div>
+                            )) : (
+                                <p style={{ padding: '20px', textAlign: 'center', color: 'var(--stat-text-muted)' }}>Sin datos de seguros en este periodo.</p>
+                            )}
+                        </div>
 
-                    <div className="complex-card">
-                        <h3>Detalle por Tipo de Servicio</h3>
-                        {stats.serviceTypesData.length > 0 ? stats.serviceTypesData.map((svc, i) => (
-                            <div key={i} className="stat-row">
-                                <span>{svc.name}</span>
-                                <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontWeight: 'bold', color: '#fff' }}>{svc.value}</div>
+                        <div className="complex-card">
+                            <h3>Detalle por Tipo de Servicio</h3>
+                            {stats.serviceTypesData.length > 0 ? stats.serviceTypesData.map((svc, i) => (
+                                <div key={i} className="stat-row">
+                                    <span>{svc.name}</span>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontWeight: 'bold', color: '#fff' }}>{svc.value}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        )) : (
-                            <p style={{ padding: '20px', textAlign: 'center', color: 'var(--stat-text-muted)' }}>Sin datos de servicios.</p>
-                        )}
-                    </div>
+                            )) : (
+                                <p style={{ padding: '20px', textAlign: 'center', color: 'var(--stat-text-muted)' }}>Sin datos de servicios.</p>
+                            )}
+                        </div>
 
-                    <div className="complex-card">
-                        <h3>Detalle por Estado (CRM)</h3>
-                        {Object.entries(stats.categories).map(([name, data], i) => (
-                            <div key={i} className="stat-row">
-                                <span>{name}</span>
-                                <div>
-                                    <strong>{data.count}</strong>
+                        <div className="complex-card">
+                            <h3>Detalle por Estado (CRM)</h3>
+                            {Object.entries(stats.categories).map(([name, data], i) => (
+                                <div key={i} className="stat-row">
+                                    <span>{name}</span>
+                                    <div>
+                                        <strong>{data.count}</strong>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Filterable Table */}
                 <div className="data-section">
