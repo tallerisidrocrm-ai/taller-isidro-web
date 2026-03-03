@@ -1,4 +1,4 @@
-// Build trigger: v1.0.2 - Statistics update
+// Build trigger: v1.2.1 - Chat iframe fix
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import React, { Suspense, lazy } from 'react';
 import TopBar from './components/TopBar';
