@@ -44,7 +44,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function StatisticsPage() {
-    console.log("StatisticsPage v1.5.0 loaded - Dual Track Evolution");
+    console.log("StatisticsPage v1.5.2 loaded - Triple Track Evolution");
     const [data, setData] = useState([]);
     const [summaryPeriod, setSummaryPeriod] = useState('monthly'); // 'daily', 'monthly', 'annual'
     const [loading, setLoading] = useState(true);
@@ -246,12 +246,18 @@ export default function StatisticsPage() {
                 return est === 'inspecion' || est === 'inspección' || est.includes('inspeccion') || est.includes('inspec');
             });
 
+            const presupuestos = monthRecords.filter(r => {
+                const est = (r.estado || '').trim().toLowerCase();
+                return est === 'presupuesto' || est.includes('presupuesto');
+            });
+
             return {
                 name: month.substring(0, 3),
                 fullName: month,
                 reparacionCantidad: reparaciones.length,
                 reparacionIngresos: reparaciones.reduce((sum, r) => sum + (Number(r.precioBase) || 0), 0),
                 inspeccionCantidad: inspecciones.length,
+                presupuestoCantidad: presupuestos.length,
                 totalUnidades: monthRecords.length
             };
         });
@@ -328,7 +334,7 @@ export default function StatisticsPage() {
                 <header className="stats-header">
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <div className="pulse-dot"></div>
-                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.5.1)</span>
+                        <span style={{ fontSize: '0.8rem', color: '#00ff00', textTransform: 'uppercase', letterSpacing: '2px' }}>CRM Live (v1.5.2)</span>
                     </div>
                     <h1 className="stats-title">Panel de Control Operativo</h1>
                     <p className="stats-subtitle">Gestión de unidades y reportes en tiempo real</p>
@@ -542,7 +548,7 @@ export default function StatisticsPage() {
                     <div className="stats-summary-section animate-slide-up">
                         <span className="section-label alt">Evolución Anual {filters.anio}</span>
                         <div className="chart-card" style={{ marginTop: '20px', padding: '20px' }}>
-                            <h3>Relación: Inspecciones vs Reparaciones (Cantidades)</h3>
+                            <h3>Relación: Inspecciones, Presupuestos y Reparaciones</h3>
                             <div style={{ height: '450px', marginTop: '20px' }}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={stats.evolutionData}>
@@ -554,6 +560,10 @@ export default function StatisticsPage() {
                                             <linearGradient id="colorInsp" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#FFC107" stopOpacity={0.3} />
                                                 <stop offset="95%" stopColor="#FFC107" stopOpacity={0} />
+                                            </linearGradient>
+                                            <linearGradient id="colorPres" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#4CAF50" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#4CAF50" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
@@ -569,6 +579,15 @@ export default function StatisticsPage() {
                                             strokeWidth={3}
                                             fillOpacity={1}
                                             fill="url(#colorInsp)"
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="presupuestoCantidad"
+                                            name="Presupuestos"
+                                            stroke="#4CAF50"
+                                            strokeWidth={3}
+                                            fillOpacity={1}
+                                            fill="url(#colorPres)"
                                         />
                                         <Area
                                             type="monotone"
@@ -592,6 +611,7 @@ export default function StatisticsPage() {
                                         <tr>
                                             <th>Mes</th>
                                             <th style={{ textAlign: 'center' }}>Inspecciones</th>
+                                            <th style={{ textAlign: 'center' }}>Presupuestos</th>
                                             <th style={{ textAlign: 'center' }}>Reparaciones</th>
                                             <th style={{ textAlign: 'right' }}>Ingresos Est.</th>
                                         </tr>
@@ -601,8 +621,9 @@ export default function StatisticsPage() {
                                             <tr key={i}>
                                                 <td><strong>{m.fullName}</strong></td>
                                                 <td style={{ textAlign: 'center', color: '#FFC107' }}>{m.inspeccionCantidad}</td>
+                                                <td style={{ textAlign: 'center', color: '#4CAF50' }}>{m.presupuestoCantidad}</td>
                                                 <td style={{ textAlign: 'center', color: '#2196F3' }}>{m.reparacionCantidad}</td>
-                                                <td style={{ textAlign: 'right', color: '#4CAF50' }}>${m.reparacionIngresos.toLocaleString()}</td>
+                                                <td style={{ textAlign: 'right', color: '#fff', opacity: '0.8' }}>${m.reparacionIngresos.toLocaleString()}</td>
                                             </tr>
                                         ))}
                                     </tbody>
