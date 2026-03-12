@@ -15,6 +15,10 @@ const CRMChat = () => {
                 webhookUrl: 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat',
                 target: '#custom-n8n-crm-wrapper',
                 mode: 'fullscreen',
+                initialMessages: [
+                    '¡Hola! 👋',
+                    '¿Cómo podemos ayudarte hoy?'
+                ],
                 i18n: {
                     en: {
                         title: '¡Hola! 👋',
