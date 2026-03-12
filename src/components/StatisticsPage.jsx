@@ -5,6 +5,8 @@ import {
     PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
     BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area
 } from 'recharts';
+import '@n8n/chat/style.css';
+import { createChat } from '@n8n/chat';
 import './StatisticsPage.css';
 
 const months = [
@@ -59,6 +61,26 @@ export default function StatisticsPage() {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [isChatOpen, setIsChatOpen] = useState(false);
+
+    useEffect(() => {
+        try {
+            createChat({
+                webhookUrl: 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat',
+                target: '#n8n-chat-container',
+                mode: 'fullscreen',
+                i18n: {
+                    en: {
+                        title: '¡Hola! 👋',
+                        subtitle: 'Iniciá un chat. Estamos aquí para ayudarte 24/7.',
+                        getStarted: 'Nuevo Chat',
+                        inputPlaceholder: 'Escribí un mensaje...'
+                    }
+                }
+            });
+        } catch (e) {
+            console.error("No se pudo inicializar n8n chat:", e);
+        }
+    }, []);
 
     useEffect(() => {
         const loadData = async () => {
@@ -779,41 +801,30 @@ export default function StatisticsPage() {
             </button>
 
             {/* Ventana de Chat CRM via iframe */}
-            {isChatOpen && (
-                <div className="crm-chat-container" style={{ zIndex: 9999 }}>
-                    <div className="crm-chat-window" style={{ background: '#fff' }}>
-                        <div className="chat-header-bar" style={{
-                            padding: '10px 15px',
-                            background: '#2196F3',
+            <div className={`crm-chat-container ${isChatOpen ? 'visible' : 'hidden'}`} style={{ zIndex: 9999 }}>
+                <div className="crm-chat-window" style={{ background: '#fff' }}>
+                    <div className="chat-header-bar" style={{
+                        padding: '10px 15px',
+                        background: '#2196F3',
+                        color: '#fff',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        borderTopLeftRadius: '20px',
+                        borderTopRightRadius: '20px'
+                    }}>
+                        <span style={{ fontWeight: 'bold' }}>Asistente CRM Isidro</span>
+                        <button onClick={() => setIsChatOpen(false)} style={{
+                            background: 'transparent',
+                            border: 'none',
                             color: '#fff',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderTopLeftRadius: '20px',
-                            borderTopRightRadius: '20px'
-                        }}>
-                            <span style={{ fontWeight: 'bold' }}>Asistente CRM Isidro</span>
-                            <button onClick={() => setIsChatOpen(false)} style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: '#fff',
-                                cursor: 'pointer',
-                                fontSize: '1.2rem'
-                            }}>&times;</button>
-                        </div>
-                        <iframe
-                            src="https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat"
-                            style={{
-                                width: '100%',
-                                height: 'calc(100% - 40px)',
-                                border: 'none',
-                            }}
-                            title="Chat CRM Taller Isidro"
-                            allow="microphone; camera"
-                        />
+                            cursor: 'pointer',
+                            fontSize: '1.2rem'
+                        }}>&times;</button>
                     </div>
+                    <div id="n8n-chat-container" style={{ width: '100%', height: 'calc(100% - 40px)' }}></div>
                 </div>
-            )}
+            </div>
         </div>
     );
 }
