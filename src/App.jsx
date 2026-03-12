@@ -1,4 +1,4 @@
-// Build trigger: v1.2.1 - Chat iframe fix
+// Build trigger: v1.2.3 - Global CRM Chat implementation
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import React, { Suspense, lazy } from 'react';
 import TopBar from './components/TopBar';
@@ -17,6 +17,7 @@ import Testimonials from './components/Testimonials';
 import Map from './components/Map';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
+import CRMChat from './components/CRMChat';
 import SEO from './components/SEO';
 
 // Lazy load components that are not part of the initial viewport or the main route
@@ -73,6 +74,7 @@ function AppContent() {
       </main>
       {!isStatsPage && <Footer />}
       {!isStatsPage && <WhatsAppButton />}
+      <CRMChat />
     </div>
   );
 }
