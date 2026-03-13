@@ -1,29 +1,34 @@
-/* CRM Floating Button */
+/* Botón flotante */
 .crm-floating-button {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: #2196F3;
-    /* Modern Blue */
-    color: #fff;
-    padding: 12px 24px;
-    border-radius: 50px;
+    bottom: 28px;
+    right: 28px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    text-decoration: none;
-    font-weight: 700;
-    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+    gap: 8px;
+    background: linear-gradient(135deg, #1565C0, #1E88E5);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(21,101,192,0.4);
+    transition: all 0.3s ease;
     z-index: 1000;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-family: inherit;
 }
 
 .crm-floating-button:hover {
-    transform: scale(1.05) translateY(-5px);
-    background: #1976D2;
-    box-shadow: 0 8px 25px rgba(33, 150, 243, 0.6);
-    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(21,101,192,0.5);
+    background: linear-gradient(135deg, #1976D2, #2196F3);
+}
+
+.crm-floating-button.active {
+    background: linear-gradient(135deg, #424242, #616161);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
 }
 
 .crm-icon {
@@ -32,105 +37,247 @@
     justify-content: center;
 }
 
-@media (max-width: 768px) {
-    .crm-floating-button {
-        bottom: 20px;
-        right: 20px;
-        padding: 12px;
-        border-radius: 50%;
-        width: 56px;
-        height: 56px;
-        justify-content: center;
-    }
-
-    .crm-floating-button span {
-        display: none;
-    }
-}
-
-/* CRM Webhook Chat Integration */
+/* Ventana de chat */
 .crm-chat-container {
     position: fixed;
-    bottom: 100px;
-    right: 30px;
-    width: 400px;
-    height: 600px;
-    max-height: calc(100vh - 120px);
-    z-index: 2000;
-    display: flex;
-    flex-direction: column;
-    transition: opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.crm-chat-container.hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(30px) scale(0.9);
+    bottom: 90px;
+    right: 28px;
+    width: 370px;
+    max-height: 580px;
+    z-index: 3000;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-origin: bottom right;
 }
 
 .crm-chat-container.visible {
     opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0) scale(1);
+    transform: scale(1) translateY(0);
+    pointer-events: all;
+}
+
+.crm-chat-container.hidden {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+    pointer-events: none;
 }
 
 .crm-chat-window {
-    width: 100%;
-    height: 100%;
-    background: #f9f9f9;
-    /* Off-white for better internal contrast */
-    color: #1a1a1a;
+    background: #fff;
     border-radius: 20px;
-    overflow: hidden;
-    border: 1px solid rgba(33, 150, 243, 0.3);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 4px 20px rgba(0,0,0,0.08);
     display: flex;
     flex-direction: column;
-    position: relative;
-    text-align: left;
+    overflow: hidden;
+    height: 520px;
+    border: 1px solid rgba(0,0,0,0.06);
 }
 
-/* Ensure the library container fills the window */
-#custom-n8n-crm-wrapper {
-    width: 100%;
-    height: 100%;
+/* Header */
+.crm-chat-header {
+    background: linear-gradient(135deg, #1565C0, #1E88E5);
+    color: white;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.crm-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.crm-avatar {
+    font-size: 24px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.crm-header-info strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.crm-status {
+    font-size: 11px;
+    opacity: 0.85;
+    color: #90EE90;
+    display: block;
+}
+
+.crm-close-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.crm-close-btn:hover {
+    background: rgba(255,255,255,0.35);
+}
+
+/* Mensajes */
+.crm-messages {
     flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f7f9fc;
+    scroll-behavior: smooth;
 }
 
-/* Responsive adjustment */
-@media (max-width: 768px) {
-    .crm-chat-container {
-        bottom: 90px;
-        right: 20px;
-        width: calc(100% - 40px);
-        max-width: 450px;
-    }
+.crm-messages::-webkit-scrollbar {
+    width: 4px;
+}
+.crm-messages::-webkit-scrollbar-track { background: transparent; }
+.crm-messages::-webkit-scrollbar-thumb { background: #cdd; border-radius: 4px; }
+
+.crm-message {
+    display: flex;
 }
 
-@media (max-width: 480px) {
+.crm-message.user {
+    justify-content: flex-end;
+}
+
+.crm-message.bot {
+    justify-content: flex-start;
+}
+
+.crm-bubble {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.crm-message.user .crm-bubble {
+    background: linear-gradient(135deg, #1565C0, #1E88E5);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.crm-message.bot .crm-bubble {
+    background: white;
+    color: #333;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* Typing animation */
+.crm-typing {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 14px 18px;
+    min-width: 60px;
+}
+
+.crm-typing span {
+    width: 7px;
+    height: 7px;
+    background: #1E88E5;
+    border-radius: 50%;
+    animation: crm-bounce 1.2s infinite;
+}
+
+.crm-typing span:nth-child(2) { animation-delay: 0.2s; }
+.crm-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes crm-bounce {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+/* Input */
+.crm-input-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-top: 1px solid #eee;
+    background: #fff;
+    flex-shrink: 0;
+}
+
+.crm-input {
+    flex: 1;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 24px;
+    padding: 10px 16px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+    background: #f7f9fc;
+}
+
+.crm-input:focus {
+    border-color: #1E88E5;
+    background: #fff;
+}
+
+.crm-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.crm-send-btn {
+    background: linear-gradient(135deg, #1565C0, #1E88E5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.crm-send-btn:hover:not(:disabled) {
+    transform: scale(1.08);
+    box-shadow: 0 2px 8px rgba(21,101,192,0.4);
+}
+
+.crm-send-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Responsivo */
+@media (max-width: 430px) {
     .crm-chat-container {
-        bottom: 0;
-        right: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        max-height: 100vh;
-        border-radius: 0;
-        z-index: 3000;
+        right: 10px;
+        bottom: 80px;
+        width: calc(100vw - 20px);
     }
-
-    .crm-chat-window {
-        border-radius: 0;
-        border: none;
-    }
-
-    /* When chat is open on mobile, hide the floating button or change its position */
-    .crm-floating-button.active {
+    .crm-floating-button {
+        right: 14px;
         bottom: 20px;
-        right: 20px;
-        z-index: 3001;
-        background: #ff5252;
-        /* Red to close */
-        box-shadow: 0 4px 15px rgba(255, 82, 82, 0.4);
     }
 }

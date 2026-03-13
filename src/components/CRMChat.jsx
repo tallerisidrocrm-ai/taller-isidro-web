@@ -1,87 +1,217 @@
 import React, { useState, useEffect, useRef } from 'react';
-import '@n8n/chat/style.css';
-import { createChat } from '@n8n/chat';
 import './CRMChat.css';
+
+const WEBHOOK_URL = 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat';
+
+const SESSION_ID = 'crm-session-' + Math.random().toString(36).slice(2, 10);
 
 const CRMChat = () => {
     const [isChatOpen, setIsChatOpen] = useState(false);
-    const chatInitialized = useRef(false);
+    const [messages, setMessages] = useState([
+        { role: 'bot', text: '¡Hola! 👋 Soy el asistente del Taller Isidro. ¿En qué puedo ayudarte hoy?' }
+    ]);
+    const [input, setInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const messagesEndRef = useRef(null);
+    const inputRef = useRef(null);
 
     useEffect(() => {
-        if (chatInitialized.current) return;
-        chatInitialized.current = true;
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages, isLoading]);
+
+    useEffect(() => {
+        if (isChatOpen && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [isChatOpen]);
+
+    const parseNDJSON = (text) => {
+        // Combines streaming NDJSON chunks into a single string
+        const lines = text.split('\n').filter(l => l.trim());
+        let result = '';
+        for (const line of lines) {
+            try {
+                const obj = JSON.parse(line);
+                if (obj.type === 'item' && obj.content) {
+                    result += obj.content;
+                } else if (obj.output !== undefined) {
+                    // Non-streaming response format
+                    result = obj.output;
+                }
+            } catch {
+                // not JSON, use raw if no stream detected
+                if (!result && line && !line.startsWith('{')) {
+                    result += line;
+                }
+            }
+        }
+        return result.trim();
+    };
+
+    const sendMessage = async () => {
+        const trimmed = input.trim();
+        if (!trimmed || isLoading) return;
+
+        setMessages(prev => [...prev, { role: 'user', text: trimmed }]);
+        setInput('');
+        setIsLoading(true);
+
         try {
-            createChat({
-                webhookUrl: 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat',
-                target: '#custom-n8n-crm-wrapper',
-                mode: 'fullscreen',
-                initialMessages: [
-                    '¡Hola! 👋',
-                    '¿Cómo podemos ayudarte hoy?'
-                ],
-                i18n: {
-                    en: {
-                        title: '¡Hola! 👋',
-                        subtitle: 'Iniciá un chat. Estamos aquí para ayudarte 24/7.',
-                        getStarted: 'Nuevo Chat',
-                        inputPlaceholder: 'Escribí un mensaje...'
+            const response = await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'sendMessage',
+                    chatInput: trimmed,
+                    sessionId: SESSION_ID,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type') || '';
+            let botText = '';
+
+            if (contentType.includes('text/event-stream') || contentType.includes('application/x-ndjson')) {
+                // Streaming: read chunks as they arrive
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                // Add placeholder message
+                setMessages(prev => [...prev, { role: 'bot', text: '' }]);
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const parsed = parseNDJSON(buffer);
+                    if (parsed) {
+                        setMessages(prev => {
+                            const updated = [...prev];
+                            updated[updated.length - 1] = { role: 'bot', text: parsed };
+                            return updated;
+                        });
                     }
                 }
-            });
-        } catch (e) {
-            console.error("No se pudo inicializar n8n chat:", e);
+                // Final parse of full buffer
+                botText = parseNDJSON(buffer);
+                setMessages(prev => {
+                    const updated = [...prev];
+                    updated[updated.length - 1] = { role: 'bot', text: botText || 'Sin respuesta.' };
+                    return updated;
+                });
+            } else {
+                // Non-streaming: parse full response
+                const raw = await response.text();
+                try {
+                    const json = JSON.parse(raw);
+                    botText = json.output || json.text || json.message || JSON.stringify(json);
+                } catch {
+                    botText = parseNDJSON(raw) || raw;
+                }
+                setMessages(prev => [...prev, { role: 'bot', text: botText || 'Sin respuesta.' }]);
+            }
+        } catch (err) {
+            console.error('Chat error:', err);
+            setMessages(prev => [...prev, {
+                role: 'bot',
+                text: '⚠️ No se pudo conectar con el asistente. Intentá de nuevo más tarde.'
+            }]);
+        } finally {
+            setIsLoading(false);
         }
-    }, []);
+    };
+
+    const handleKey = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    };
 
     return (
         <>
-            {/* Botón flotante CRM */}
+            {/* Botón flotante */}
             <button
                 onClick={() => setIsChatOpen(!isChatOpen)}
                 className={`crm-floating-button ${isChatOpen ? 'active' : ''}`}
-                title="Hablar con CRM"
-                style={{ 
-                    zIndex: isChatOpen ? 3001 : 1000 
-                }}
+                title="Hablar con el Asistente"
+                style={{ zIndex: isChatOpen ? 3001 : 1000 }}
             >
                 <div className="crm-icon">
                     {isChatOpen ? (
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
                         </svg>
                     ) : (
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
                     )}
                 </div>
-                <span>{isChatOpen ? 'Cerrar Chat' : 'Chat CRM'}</span>
+                <span>{isChatOpen ? 'Cerrar' : 'Asistente'}</span>
             </button>
 
-            {/* Ventana de Chat CRM */}
+            {/* Ventana de chat */}
             <div className={`crm-chat-container ${isChatOpen ? 'visible' : 'hidden'}`} style={{ zIndex: 3000 }}>
-                <div className="crm-chat-window" style={{ background: '#fff' }}>
-                    <div className="chat-header-bar" style={{
-                        padding: '10px 15px',
-                        background: '#2196F3',
-                        color: '#fff',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        borderTopLeftRadius: '20px',
-                        borderTopRightRadius: '20px'
-                    }}>
-                        <span style={{ fontWeight: 'bold' }}>Asistente CRM Isidro</span>
-                        <button onClick={() => setIsChatOpen(false)} style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#fff',
-                            cursor: 'pointer',
-                            fontSize: '1.2rem'
-                        }}>&times;</button>
+                <div className="crm-chat-window">
+                    {/* Header */}
+                    <div className="crm-chat-header">
+                        <div className="crm-header-info">
+                            <div className="crm-avatar">🤖</div>
+                            <div>
+                                <strong>Asistente Taller Isidro</strong>
+                                <span className="crm-status">● En línea</span>
+                            </div>
+                        </div>
+                        <button className="crm-close-btn" onClick={() => setIsChatOpen(false)}>✕</button>
                     </div>
-                    <div id="custom-n8n-crm-wrapper" style={{ width: '100%', height: 'calc(100% - 40px)' }}></div>
+
+                    {/* Mensajes */}
+                    <div className="crm-messages">
+                        {messages.map((msg, i) => (
+                            <div key={i} className={`crm-message ${msg.role}`}>
+                                <div className="crm-bubble">{msg.text}</div>
+                            </div>
+                        ))}
+                        {isLoading && (
+                            <div className="crm-message bot">
+                                <div className="crm-bubble crm-typing">
+                                    <span /><span /><span />
+                                </div>
+                            </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* Input */}
+                    <div className="crm-input-area">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={input}
+                            onChange={e => setInput(e.target.value)}
+                            onKeyDown={handleKey}
+                            placeholder="Escribí tu consulta..."
+                            disabled={isLoading}
+                            className="crm-input"
+                        />
+                        <button
+                            onClick={sendMessage}
+                            disabled={isLoading || !input.trim()}
+                            className="crm-send-btn"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </>
