@@ -27,25 +27,34 @@ const CRMChat = () => {
         }
     }, [isChatOpen]);
 
+    // PROTECCIÓN EXTRA: Solo renderizar si estamos seguros de que es estadísticas
+    const isStatsDomain = window.location.hostname.includes('estadisticas');
+    const isStatsPath = window.location.pathname.startsWith('/estadisticas');
+    if (!isStatsDomain && !isStatsPath) return null;
+
+
     const parseNDJSON = (text) => {
-        // Combines streaming NDJSON chunks into a single string
         const lines = text.split('\n').filter(l => l.trim());
         let result = '';
+        let hasError = false;
         for (const line of lines) {
             try {
                 const obj = JSON.parse(line);
                 if (obj.type === 'item' && obj.content) {
                     result += obj.content;
+                } else if (obj.type === 'error') {
+                    hasError = true;
                 } else if (obj.output !== undefined) {
-                    // Non-streaming response format
                     result = obj.output;
                 }
             } catch {
-                // not JSON, use raw if no stream detected
                 if (!result && line && !line.startsWith('{')) {
                     result += line;
                 }
             }
+        }
+        if (hasError && !result) {
+            return '__ERROR__';
         }
         return result.trim();
     };
@@ -100,9 +109,12 @@ const CRMChat = () => {
                 }
                 // Final parse of full buffer
                 botText = parseNDJSON(buffer);
+                const finalText = botText === '__ERROR__'
+                    ? '⚠️ El asistente tuvo un problema interno. Por favor intentá de nuevo.'
+                    : (botText || 'Sin respuesta.');
                 setMessages(prev => {
                     const updated = [...prev];
-                    updated[updated.length - 1] = { role: 'bot', text: botText || 'Sin respuesta.' };
+                    updated[updated.length - 1] = { role: 'bot', text: finalText };
                     return updated;
                 });
             } else {
@@ -114,7 +126,10 @@ const CRMChat = () => {
                 } catch {
                     botText = parseNDJSON(raw) || raw;
                 }
-                setMessages(prev => [...prev, { role: 'bot', text: botText || 'Sin respuesta.' }]);
+                const finalText = botText === '__ERROR__'
+                    ? '⚠️ El asistente tuvo un problema interno. Por favor intentá de nuevo.'
+                    : (botText || 'Sin respuesta.');
+                setMessages(prev => [...prev, { role: 'bot', text: finalText }]);
             }
         } catch (err) {
             console.error('Chat error:', err);
@@ -175,11 +190,20 @@ const CRMChat = () => {
 
                     {/* Mensajes */}
                     <div className="crm-messages">
-                        {messages.map((msg, i) => (
-                            <div key={i} className={`crm-message ${msg.role}`}>
-                                <div className="crm-bubble">{msg.text}</div>
-                            </div>
-                        ))}
+                        {messages.map((msg, i) => {
+                            // Limpia caracteres molestos como **, *, o convierte guiones en viñetas limpias
+                            const cleanedText = msg.text
+                                ? msg.text.replace(/\*\*(.*?)\*\*/g, '$1')
+                                          .replace(/\*(.*?)\*/g, '$1')
+                                          .replace(/^-\s+/gm, '• ')
+                                          .replace(/^#+\s/gm, '')
+                                : '';
+                            return (
+                                <div key={i} className={`crm-message ${msg.role}`}>
+                                    <div className="crm-bubble" style={{ whiteSpace: 'pre-wrap' }}>{cleanedText}</div>
+                                </div>
+                            );
+                        })}
                         {isLoading && (
                             <div className="crm-message bot">
                                 <div className="crm-bubble crm-typing">

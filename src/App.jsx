@@ -57,7 +57,9 @@ function HomePage() {
 
 function AppContent() {
   const location = useLocation();
-  const isStatsPage = location.pathname.startsWith('/estadisticas');
+  const isStatsDomain = window.location.hostname.includes('estadisticas');
+  const isStatsPath = location.pathname.startsWith('/estadisticas');
+  const isStatsPage = isStatsDomain || isStatsPath;
 
   return (
     <div className="app">
@@ -74,7 +76,7 @@ function AppContent() {
       </main>
       {!isStatsPage && <Footer />}
       {!isStatsPage && <WhatsAppButton />}
-      <CRMChat />
+      {isStatsPage && <CRMChat />}
     </div>
   );
 }
