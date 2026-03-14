@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './CRMChat.css';
 
-const WEBHOOK_URL = import.meta.env.VITE_CHAT_WEBHOOK_URL || 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat';
+// Webhook de n8n para Chat (FORZADO relativo para seguridad y proxy)
+const WEBHOOK_URL = '/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat';
 
 const SESSION_ID = 'crm-session-' + crypto.randomUUID();
 
@@ -68,9 +69,27 @@ const CRMChat = () => {
         setIsLoading(true);
 
         try {
+            const apiKey = import.meta.env.VITE_API_KEY || 'tis-k8x7m2p4q9w1n6v3j5';
+            const headers = { 'Content-Type': 'application/json' };
+            
+            // Verificamos si la API Key existe
+            if (apiKey) {
+                // btoa en navegadores modernos maneja strings ASCII. 
+                // Aseguramos el formato correcto user:pass
+                const authHeader = btoa(`tallerisidro:${apiKey}`);
+                headers['Authorization'] = `Basic ${authHeader}`;
+            }
+
+            if (import.meta.env.DEV || true) {
+                console.log('--- DEBUG CHAT ---');
+                console.log('URL:', WEBHOOK_URL);
+                console.log('Headers Keys:', Object.keys(headers));
+                console.log('Auth Present:', !!headers['Authorization']);
+            }
+
             const response = await fetch(WEBHOOK_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     action: 'sendMessage',
                     chatInput: trimmed,
@@ -79,7 +98,9 @@ const CRMChat = () => {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                const errorBody = await response.text();
+                console.error('API Error Response:', response.status, errorBody);
+                throw new Error(`HTTP ${response.status}: ${errorBody.substring(0, 50)}`);
             }
 
             const contentType = response.headers.get('content-type') || '';
@@ -122,7 +143,9 @@ const CRMChat = () => {
                 const raw = await response.text();
                 try {
                     const json = JSON.parse(raw);
-                    botText = json.output || json.text || json.message || JSON.stringify(json);
+                    // n8n responde a menudo como un array [{json: {output: "..."}}]
+                    const data = Array.isArray(json) ? (json[0]?.json || json[0]) : json;
+                    botText = data?.output || data?.text || data?.message || data?.response || JSON.stringify(data);
                 } catch {
                     botText = parseNDJSON(raw) || raw;
                 }
@@ -132,12 +155,10 @@ const CRMChat = () => {
                 setMessages(prev => [...prev, { role: 'bot', text: finalText }]);
             }
         } catch (err) {
-            if (import.meta.env.DEV) {
-                console.error('Chat error:', err);
-            }
+            console.error('CRITICAL CHAT ERROR:', err);
             setMessages(prev => [...prev, {
                 role: 'bot',
-                text: '⚠️ No se pudo conectar con el asistente. Intentá de nuevo más tarde.'
+                text: `⚠️ No se pudo conectar: ${err.message}`
             }]);
         } finally {
             setIsLoading(false);
