@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './CRMChat.css';
 
-const WEBHOOK_URL = 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat';
+const WEBHOOK_URL = import.meta.env.VITE_CHAT_WEBHOOK_URL || 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/a9a59773-0ba4-401c-8643-95ea14e488d7/chat';
 
-const SESSION_ID = 'crm-session-' + Math.random().toString(36).slice(2, 10);
+const SESSION_ID = 'crm-session-' + crypto.randomUUID();
 
 const CRMChat = () => {
     const [isChatOpen, setIsChatOpen] = useState(false);
@@ -132,7 +132,9 @@ const CRMChat = () => {
                 setMessages(prev => [...prev, { role: 'bot', text: finalText }]);
             }
         } catch (err) {
-            console.error('Chat error:', err);
+            if (import.meta.env.DEV) {
+                console.error('Chat error:', err);
+            }
             setMessages(prev => [...prev, {
                 role: 'bot',
                 text: '⚠️ No se pudo conectar con el asistente. Intentá de nuevo más tarde.'

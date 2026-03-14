@@ -4,7 +4,7 @@
  */
 
 // Placeholder for the n8n webhook URL mentioned in the initial prompt
-const N8N_DATA_URL = 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/9b616f6d-415c-4c4b-871b-542ace0b5c22';
+const N8N_DATA_URL = import.meta.env.VITE_DATA_WEBHOOK_URL || 'https://tallerisidro-n8n.6shxj1.easypanel.host/webhook/9b616f6d-415c-4c4b-871b-542ace0b5c22';
 
 export const dataService = {
     /**
