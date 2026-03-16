@@ -69,23 +69,10 @@ const CRMChat = () => {
         setIsLoading(true);
 
         try {
-            const apiKey = import.meta.env.VITE_API_KEY || 'tis-k8x7m2p4q9w1n6v3j5';
+            // El Frontend ya no gestiona la clave de autenticación.
+            // Nginx intercepta este request y agrega el header "Authorization" 
+            // de forma segura antes de mandarlo a n8n.
             const headers = { 'Content-Type': 'application/json' };
-            
-            // Verificamos si la API Key existe
-            if (apiKey) {
-                // btoa en navegadores modernos maneja strings ASCII. 
-                // Aseguramos el formato correcto user:pass
-                const authHeader = btoa(`tallerisidro:${apiKey}`);
-                headers['Authorization'] = `Basic ${authHeader}`;
-            }
-
-            if (import.meta.env.DEV || true) {
-                console.log('--- DEBUG CHAT ---');
-                console.log('URL:', WEBHOOK_URL);
-                console.log('Headers Keys:', Object.keys(headers));
-                console.log('Auth Present:', !!headers['Authorization']);
-            }
 
             const response = await fetch(WEBHOOK_URL, {
                 method: 'POST',
