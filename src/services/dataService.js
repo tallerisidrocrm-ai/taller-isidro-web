@@ -13,15 +13,7 @@ export const dataService = {
      */
     async getStatisticsData() {
         try {
-            const apiKey = import.meta.env.VITE_API_KEY || 'tis-k8x7m2p4q9w1n6v3j5';
             const headers = { 'Content-Type': 'application/json' };
-            
-            if (apiKey) {
-                // Mismo usuario/pass que el chat
-                const authHeader = btoa(`tallerisidro:${apiKey}`);
-                headers['Authorization'] = `Basic ${authHeader}`;
-            }
-
             const response = await fetch(N8N_DATA_URL, { headers });
             if (!response.ok) {
                 const errorText = await response.text();
