@@ -81,7 +81,7 @@ export default function StatisticsPage() {
         };
         loadData();
 
-        const interval = setInterval(loadData, 30000); // Polling 30 seconds for live updates
+        const interval = setInterval(loadData, 300000); // Polling cada 5 minutos (protege cuota Airtable)
         return () => clearInterval(interval);
     }, []);
 
@@ -260,9 +260,7 @@ export default function StatisticsPage() {
             };
         });
 
-        console.log("Categories:", categories);
-        console.log("Daily Stats:", dailyStats);
-        console.groupEnd();
+
 
         return {
             total: targetData.length,
